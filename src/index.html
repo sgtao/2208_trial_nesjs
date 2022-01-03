@@ -1,27 +1,91 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Webpack App</title>
-        <!-- <link rel="stylesheet" href="style.css"> -->
-    </head>
-    <body>
-        <h1>Hello world!</h1>
-        <h2>Tip: Check your console</h2>
-    </body>
-    
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker
-                    .register("service-worker.js")
-                    .then((registration) => {
-                        console.log("Service Worker registered: ", registration);
-                    })
-                    .catch((registrationError) => {
-                        console.error("Service Worker registration failed: ", registrationError);
-                    });
-            });
-        }
-    </script>
+<head>
+    <meta charset="utf-8" />
+    <title>trial_nesjs</title>
+</head>
+<body>
+    <h1>trial nesjs</h1>
+    <div class="container">
+        <canvas id="nesdisplay" style="border: 1pt solid black"></canvas>
+        <div class="romselector">
+            <label>ROM選択：</label>
+            <select name="romselect" id="romselect">
+                <option value="helloworld">helloworld</option>
+                <option value="nestest">nestest</option>
+                <option value="MegaAri">MegaAri</option>
+            </select>
+            <button id="romload">ロード</button>
+            <span>ROMファイルを選択して「ロード」ボタンを押してください。</span>
+        </div>
+        <div class="gamectrl">
+            <span>本体操作</span>
+            <button>START</button>
+            <button>STOP</button>
+            <button>RESET</button>
+        </div>
+        <div class="gamepad">
+            <table>
+                <thead>
+                    <th>操作方法</th>
+                    <th>１P</th>
+                    <tbody>
+                        <tr>
+                            <td>UP</td>
+                            <td>↑</td>
+                        </tr>
+                        <tr>
+                            <td>DOWN</td>
+                            <td>↓</td>
+                        </tr>
+                        <tr>
+                            <td>LEFT</td>
+                            <td>←</td>
+                        </tr>
+                        <tr>
+                            <td>RIGHT</td>
+                            <td>→</td>
+                        </tr>
+                        <tr>
+                            <td>SELECT</td>
+                            <td>Shift</td>
+                        </tr>
+                        <tr>
+                            <td>START</td>
+                            <td>ENTER</td>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td>Z</td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td>X</td>
+                        </tr>
+                    </tbody>
+                </thead>
+            </table>
+        </div>
+        <div class="supplements">
+            <span>操作方法は、sairoutineさんの「<a href="https://sairoutine.github.io/faithjs/public/" target="_blank" rel="noopener noreferrer">faithjs</a>」のインタフェースを踏襲させていただきました。</span>
+            <span>ROｍの「MegaAri」は、<a href="https://littlelimit.net/fc.htm" target="_blank" rel="noopener noreferrer">
+Little Limit 門真 なむ</a>様の作成されたものを
+利用させていただいております。            
+        </div>
+    </div>
+</body>
+<script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker
+                .register("service-worker.js")
+                .then((registration) => {
+                    console.log("Service Worker registered: ", registration);
+                })
+                .catch((registrationError) => {
+                    console.error("Service Worker registration failed: ", registrationError);
+                });
+        });
+    }
+</script>
 </html>
