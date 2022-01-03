@@ -4,7 +4,9 @@ import './styles/vendors/bootstrap-reboot.css';
 import './styles/style.css';
 //
 // import JS files
-var NES = require('./NES');
+// var NES = require('./NES');
+import NES from './NES';
+import { DBGROM } from './NES/debuggerNES';
 // 主要要素の取得
 // canvas
 var canvas = document.querySelector('#NESdisplay');
@@ -12,29 +14,36 @@ var canvas_width = 256;
 var canvas_height = 224;
 // nes
 var nes = new NES(canvas);
+// console
+var dbg_console = document.querySelector('#DBGconsole');
+var dbg_textarea = dbg_console.querySelector('.textArea');
 // 初期化
 window.onload = function () {
   // 画面の高さに応じてcanvasサイズ変更
   resize_canvas();
-  nes.initCanvas();
   // DOM イベントの初期化
   initialize_dom_events();
 };
 // NES画面のリサイズ
 function resize_canvas() {
-  console.log(window.innerWidth * 0.9);
-  console.log(canvas_width);
-  let diameter = Math.floor(window.innerWidth * 0.9 / canvas_width);
-  nes.ctx_multiple = diameter;
-  console.log(diameter);
-  canvas.width = canvas_width * diameter;
-  canvas.height = canvas_height * diameter;
-  canvas.style.width = canvas_width * diameter;
-  canvas.style.height = canvas_height * diameter;
+  let magnification = Math.floor(window.innerWidth * 0.9 / canvas_width);
+  if (nes.ctx_multiple != magnification) { 
+    console.log(`previous canvas size ${canvas_width}, current windows width(x0.9)= ${window.innerWidth * 0.9}`);
+    console.log(`change magnification to ${magnification}`);
+    nes.ctx_multiple = magnification;
+    canvas.width = canvas_width * magnification;
+    canvas.height = canvas_height * magnification;
+    canvas.style.width = canvas_width * magnification;
+    canvas.style.height = canvas_height * magnification;
+  }
+  nes.initCanvas();
 }
 // ROM をNESにセットする
 function nes_rom_change(arraybuffer) {
   console.dir(arraybuffer);
+  let nesrom = new DBGROM(arraybuffer, dbg_textarea);
+  console.log('charactor ROM : ');
+  console.log(nesrom.toHEX_charrom());
   // if (!nes.SetRom(arraybuffer)) {
   //   console.error("Can't get rom data (perhaps you don't set ArrayBuffer arguments or it's not nes rom format)");
   //   return;
