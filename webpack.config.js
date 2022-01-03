@@ -4,7 +4,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const WorkboxWebpackPlugin = require("workbox-webpack-plugin");
-
+const ESLintPlugin = require('eslint-webpack-plugin');
 const isProduction = process.env.NODE_ENV == "production";
 
 const stylesHandler = isProduction
@@ -36,7 +36,9 @@ const config = {
     rules: [
       {
         test: /\.(js|jsx)$/i,
-        loader: "babel-loader",
+        exclude: /node_modules/,
+        // use: ["babel-loader", "eslint-loader"], // When check lint in build, Error Occur.
+        use: ["babel-loader"],
       },
       {
         test: /\.css$/i,

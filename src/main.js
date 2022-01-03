@@ -31,7 +31,7 @@ function resize_canvas() {
   canvas.height = canvas_height * diameter;
   canvas.style.width = canvas_width * diameter;
   canvas.style.height = canvas_height * diameter;
-};
+}
 // ROM をNESにセットする
 function nes_rom_change(arraybuffer) {
   console.dir(arraybuffer);
@@ -41,24 +41,24 @@ function nes_rom_change(arraybuffer) {
   // }
   // nes.Init();
   // nes.Run();
-};
+}
 // ローカル上のROMを読み込み
 function read_local_file(fileObj, cb) {
   var reader = new FileReader();
   reader.onload = function (e) { cb(e.target.result); };
   reader.readAsArrayBuffer(fileObj);
-};
+}
 // URL からROMを読み込み
 function read_url(url, cb) {
   var request = new XMLHttpRequest();
   request.onload = function () { cb(request.response); };
   request.onerror = function (e) {
-    console.error("can't get rom binary");
+    console.error("can't get rom binary. Error is ",e);
   };
   request.open('GET', url, true);
   request.responseType = 'arraybuffer';
   request.send(null);
-};
+}
 // DOMのイベントを設定
 function initialize_dom_events() {
   if (typeof window.FileReader !== "undefined") {
@@ -91,4 +91,4 @@ function initialize_dom_events() {
   }
   // 画面の高さに応じてcanvasサイズ変更
   window.addEventListener('resize', resize_canvas);
-};
+}

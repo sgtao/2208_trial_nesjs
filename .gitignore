@@ -5,3 +5,4 @@ package-lock.json
 docs/*.html
 docs/*.js
 docs/*.css
+yarn-error.log
