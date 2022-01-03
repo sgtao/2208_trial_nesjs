@@ -40,7 +40,6 @@ function resize_canvas() {
 }
 // ROM をNESにセットする
 function nes_rom_change(arraybuffer) {
-  console.dir(arraybuffer);
   let nesrom = new DBGROM(arraybuffer, dbg_textarea);
   console.log('charactor ROM : ');
   console.log(nesrom.toHEX_charrom());
@@ -53,12 +52,14 @@ function nes_rom_change(arraybuffer) {
 }
 // ローカル上のROMを読み込み
 function read_local_file(fileObj, cb) {
+  console.log('read filename is ' + fileObj.name);
   var reader = new FileReader();
   reader.onload = function (e) { cb(e.target.result); };
   reader.readAsArrayBuffer(fileObj);
 }
 // URL からROMを読み込み
 function read_url(url, cb) {
+  console.log('rom url is ' + url);
   var request = new XMLHttpRequest();
   request.onload = function () { cb(request.response); };
   request.onerror = function (e) {
@@ -94,7 +95,6 @@ function initialize_dom_events() {
 
         // ROM の場所
         var url = document.getElementById("romlist").value;
-        console.log('rom url is ' + url);
         read_url(url, nes_rom_change);
       }, false);
   }
