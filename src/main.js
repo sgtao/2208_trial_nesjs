@@ -41,7 +41,7 @@ function resize_canvas() {
 // ROM をNESにセットする
 function nes_rom_change(arraybuffer) {
   let nesrom = new DBGROM(arraybuffer, dbg_textarea);
-  console.log('charactor ROM : ');
+  console.log(nesrom.toHEX_progrom());
   console.log(nesrom.toHEX_charrom());
   // if (!nes.SetRom(arraybuffer)) {
   //   console.error("Can't get rom data (perhaps you don't set ArrayBuffer arguments or it's not nes rom format)");

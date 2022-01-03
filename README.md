@@ -3,7 +3,7 @@
   - refer GitHub : [sairoutine's faithjs](https://github.com/sairoutine/faithjs)
   - refer GitHub : [takahirox's nes-js](https://github.com/takahirox/nes-js)
   - refer Qiita : [bokuwebさんの記事](https://qiita.com/bokuweb/items/1575337bef44ae82f4d3)
-  - refer [NES研究室](https://wiki.nesdev.org/w/index.php?title=Nesdev)
+  - refer [Nesdev Wiki](https://wiki.nesdev.org/w/index.php?title=Nesdev)
 
 ## Project setup
 ```

@@ -38,20 +38,34 @@ export class DBGROM {
     textarea_charROM.value += 'mapper = ' + mapper + '\n';
     if (DBG_Level >= 2) {
       textarea_charROM.value += '------------------\n';
-      //
+      textarea_charROM.value += this.toHEX_progrom();
+      textarea_charROM.value += '------------------\n';
       textarea_charROM.value += this.toHEX_charrom();
-      // const PROGRAM_ROM_SIZE = 0x4000;   // unit size is 16KB
       textarea_charROM.value += '------------------\n';
     }
   }
+  toHEX_progrom() {
+    let chardata;
+    let progrom_hex = '';
+    const PROGRAM_ROM_SIZE = 0x4000; // unit size is 16KB
+    let spritesNum = PROGRAM_ROM_SIZE * this.headerROM[4] / 16; // ROM_SIZE * NUM_prog_pages / 16Byte
+    if (DBG_Level <= 1) return progrom_hex;
+    progrom_hex += 'PROGRAM_ROM_DATA:\n';
+    for (let i = 0; i < spritesNum; i++) {
+      chardata = this.programROM.slice(i * 16, i * 16 + 16);
+     progrom_hex += log.toHex(i) + ' : ' + log.toHexarray(chardata) + '\n';
+    }
+    return progrom_hex;
+  }
   toHEX_charrom() {
+    let chardata;
     let charrom_hex = '';
     const CHARACTOR_ROM_SIZE = 0x2000; // unit size is 8KB
     let spritesNum = CHARACTOR_ROM_SIZE * this.headerROM[5] / 16; // ROM_SIZE * NUM_char_pages / 16Byte
     if (DBG_Level <= 1) return charrom_hex;
     charrom_hex += 'CHARACTOR_ROM_DATA:\n';
     for (let i = 0; i < spritesNum; i++) {
-      let chardata = this.characterROM.slice(i * 16, i * 16 + 16);
+      chardata = this.characterROM.slice(i * 16, i * 16 + 16);
       charrom_hex += log.toHex(i) + ' : ' + log.toHexarray(chardata) + '\n';
     }
     return charrom_hex;

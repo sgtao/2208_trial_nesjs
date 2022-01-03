@@ -2,7 +2,4 @@ README.txt
 node_modules
 yarn.lock
 package-lock.json
-docs/*.html
-docs/*.js
-docs/*.css
 yarn-error.log
