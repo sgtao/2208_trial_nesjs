@@ -14,7 +14,7 @@ const stylesHandler = isProduction
 const config = {
   entry: "./src/main.js",
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "docs"),
   },
   devServer: {
     open: true,
@@ -51,6 +51,13 @@ const config = {
       // Learn more about loaders from https://webpack.js.org/loaders/
     ],
   },
+  devServer: {
+    port: 8080,
+    static: {
+      directory: `${__dirname}/docs/`,
+    },
+    open: true,
+  },  
 };
 
 module.exports = () => {
