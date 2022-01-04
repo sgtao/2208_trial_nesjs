@@ -332,10 +332,24 @@ template {
   display: none !important;
 }
 
-/*!************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./src/styles/style.css ***!
-  \************************************************************************/
+/*!***************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/style.scss ***!
+  \***************************************************************************************************************************************************/
 html, body {
   font-family: "Kameron", "Noto Sans JP", sans-serif;
 }
 
+h1 {
+  font-size: 2em;
+  color: blue;
+  transition: all 0.3s;
+}
+h1:hover {
+  transform: translateX(50px);
+  color: red;
+}
+
+#NESdisplay {
+  display: block;
+  margin: 40px auto;
+}

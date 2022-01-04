@@ -1,7 +1,7 @@
 'use strict';
 // import CSS files
 import './styles/vendors/bootstrap-reboot.css';
-import './styles/style.css';
+import './style.scss';
 //
 // import JS files
 // var NES = require('./NES');
