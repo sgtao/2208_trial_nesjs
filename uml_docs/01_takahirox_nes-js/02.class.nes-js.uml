@@ -1,0 +1,275 @@
+@startuml
+
+Title 
+Class Diagram of takahirox's nes-js
+refer GitHub : https://github.com/takahirox/nes-js
+end Title
+
+object User
+object index.html
+User->index.html
+
+object index.html {
+  {field} #mainCanvas : canvas
+}
+class main {
+  {field} nes : NesJs.Nes
+  {field} rom : NesJs.Rom(buffer)
+  {method} init()
+  {method} ROMloaded()
+  {method} NESran()
+  {method} NESstopped()
+  {method} loadRom()
+  {method} run(buffer)
+  {method} putMessage(str)
+  {method} pushDumpROM()
+  {method} pushDumpReg()
+  {method} pushDumpRAM()
+  {method} pushDumpVRAM()
+  {method} pushDumpSPRRAM()
+  {method} pushStopButton()
+  {method} pushStepButton()
+  {method} pushResumeButton()
+  {method} pressPadButton(key)
+  {method} releasePadButton(key)
+  {method} dropHandler(e)
+}
+index.html-->main : script in HTML
+
+class NesJs {
+  {field} Nes : Nes;
+  {field} Rom : Rom;
+  {field} Audio : Audio;
+  {field} Display : Display;
+  {field} Joypad : Joypad;
+}
+main --> NesJs : <<index.js>>
+NesJs --> Nes : NesJs.Nes
+
+class Nes {
+  {field} ppu : Ppu();
+  {field} cpu : Cpu();
+  {field} apu : Apu();
+  {field} pad1 : Joypad();
+  {field} pad2 : Joypad();
+  {field} rom : ROM();
+  {field} state : POFF/RUN/STOP
+  {field} audioEnabled : boolean
+  {field} onFpsUpdates : Array()
+  {method} addEventListener('fps', onFpsUpdates)
+  {method} invokeFpsUpdateListeners(fps)
+  {method} setRom(rom)
+  {method} setDisplay(display)
+  {method} setAudio(audio)
+  {method} bootup()
+  {method} reset()
+  {method} stop()
+  {method} resume()
+  {method} run()
+  {method} runCycle()
+  {method} runStep()
+  {method} handleKeyDown(e) : pad1.pressButton
+  {method} handleKeyUp(e) : pad1.releaseButton
+  {method} measureFps()
+  {method} dumpCpu()
+  {method} dumpRam()
+  {method} dumpRom()
+  {method} dumpPpu()
+  {method} dumpVRam()
+  {method} dumpSprRam()
+}
+Nes --> Ppu : new Ppu()
+Nes --> Cpu : new Cpu()
+Nes --> Apu : new Apu()
+Nes --> Joypad : new Joypad()
+Nes --> Rom : nes.setRom(rom)
+
+class Ppu {
+  {field} frame : int
+  {field} scanLine : int
+  {field} cycle : int
+  {field} display : Display(canvas)
+  {field} vRam : Memory(16 * 1024)
+  {field} oamRam : Memory(256)
+  {field} oamRam2 : Memory(32);
+  {field} ppuctrl : PpuControlRegister()
+  {field} ppumask : PpuMaskRegister()
+  {field} ppustatus : PpuStatusRegister()
+  {field} *Register : Register8bit
+  {field} *Latch : int
+  {field} sprite* : Array
+  {field} PALETTES : Array
+  {field} cpu : Nes.cpu
+  {field} rom : Array
+  {field} display : Array
+  
+  {method} bootup()
+  {method} reset()
+  {method} runCycle()
+  {method} loadRegister(address)
+  {method} storeRegister(address, value)
+  {method} load(address)
+  {method} store(address, value)
+  {method} getNameTableAddressWithMirroring(address)
+  {method} renderPixel()
+  {method} getBackgroundPixel()
+  {method} shiftRegisters()
+  {method} fetch()
+  {method} fetchNameTable()
+  {method} fetchAttributeTable()
+  {method} fetchPatternTableLow()
+  {method} fetchPatternTableHigh()
+  {method} updateFlags()
+  {method} countUpScrollCounters()
+  {method} countUpCycle()
+  {method} incrementVRamAddress()
+  {method} evaluateSprites()
+  {method} processSpritePixels()
+  {method} getPatternTableElement(index, x, y, ySize)
+  {method} dump()
+  {method} dumpVRAM()
+  {method} dumpSPRRAM()
+}
+Memory<--Ppu
+Register<--Ppu
+Ppu -> PpuXXXRegister
+Display<--Ppu : nes.ppu.setDisplay('#mainCanvas')
+Ppu->Rom : ppu.setRom(rom)
+
+class Memory {
+  {field} data : Uint8Array(arg)
+  {method} clear()
+  {method} getCapacity()
+  {method} load(address)
+  {method} loadWithoutMapping(address)
+  {method} store(address, value) 
+  {method} storeWithoutMapping(address, value)  
+  {method} dump()
+}
+
+class Register {
+  {field} data : Uint8Array or Uint16Array
+  {method} getWidth()
+  {method} load*()
+  {method} store*(value)
+  {method} clear()
+  {method} setBit(pos) / clearBit(pos)
+  {method} increment*()
+  {method} add(value)
+  {method} decrement*()
+  {method} sub(value)
+  {method} shift(value)
+  {method} dump()
+}
+Register <|-- PpuXXXRegister
+
+class Display {
+  {field} ctx : canvas
+  {field} width : canvas.width = 256
+  {field} height : canvas.height = 240
+  {field} data : ctx.ImageData
+  {field} uint32 : data.data.buffer
+  {method} renderPixel(x, y, c)
+  {method} updateScreen()
+}
+Display -> index.html : ctx.putImageData(data)
+
+class Cpu {
+  {field} pc : Register16bit
+  {field} a,x,y,sp,p : Register8bit
+  {field} ram : Memory(16 * 1024)
+  {field} ppu :setPpu()
+  {field} apu :setApu()
+  {field} pad1 :setJoypad1()
+  {field} pad1 :setJoypad1()
+  {field} rom : setRom()
+  {field} stallCycle : int = 0
+  bootup()
+  reset()
+  runCycle()
+  isStall()
+  interrupt(type)
+  load(address)
+  store(address, value)
+  load2Bytes(address)
+  load2BytesFromZeropage(address)
+  load2BytesInPage(address)
+  store2Bytes(address, value)
+  fetch()
+  decode(opc)
+  jumpToInterruptHandler(type)
+  loadWithAddressingMode(op)
+  storeWithAddressingMode(op, value)
+  updateMemoryWithAddressingMode(op, func)
+  getAddressWithAddressingMode(op)
+  updateN(value)
+  updateZ(value)
+  updateC(value)
+  getStackAddress()
+  pushStack(value)
+  pushStack2Bytes(value)
+  popStack()
+  popStack2Bytes()
+  doBranch(op, flag)
+  operate(op, opc)
+  disassembleROM()
+  dump()
+  dumpRAM()
+  dumpMemoryAddressingMode(op, mem, pc)
+}
+Nes->Cpu
+Memory<--Cpu
+Register<--Cpu
+Cpu->Rom : cpu.setRom(rom)
+
+
+class Joypad {
+  {field} register : Register8bit()
+  {field} latch = 0
+  {field} currentButton = 0
+  {field} buttonNum : getButtonsNum()
+  {field} buttons[] : boolean
+  {method} getButtonsNum()
+  {method} pressButton(type)
+  {method} releaseButton(type)
+  {method} loadRegister()
+  {method} storeRegister(value)
+  {method} dump() = NOP.
+}
+Cpu->Joypad
+
+class Rom {
+  {field} header : RomHeader()
+  {field} mapper : MapperFactory()
+  {method}   load(address)
+  {method}  store(address, value)
+  {method}  isNes()
+  {method}  getHeaderSize()
+  {method}  hasChrRom()
+  {method}  getMirroringType()
+  {method}  dumpHeader()
+  {method}  RomHeader(rom)
+  {method}  getSize()
+  {method}  getSignature()
+  {method}  getMagicNumber()
+  {method}  getPRGROMBanksNum()
+  {method} getCHRROMBanksNum()
+  {method} hasChrRom()
+  {method} getControlByte1()
+  {method} getControlByte2()
+  {method} getRAMBanksNum()
+  {method} getUnusedField()
+  {method} extractBits(value, offset, size)
+  {method} getMirroringType()
+  {method} getMirroringTypeAsStrings()
+  {method} isHorizontalMirroring()
+  {method} getBatteryBackedRAM()
+  {method} getTrainer512Bytes()
+  {method} getFourScreenMirroring()
+  {method} getMapperNum()
+  {method} dump()
+}
+Rom<--Nes
+Memory <|-- Rom
+
+@enduml

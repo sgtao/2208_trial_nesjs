@@ -1,0 +1,53 @@
+@startuml
+
+Title 
+Usecase of takahirox's nes-js
+GitHub : https://github.com/takahirox/nes-js
+end Title
+
+left to right direction
+
+actor User
+File  RomData [
+This is a <b>RomData
+====
+Header (16 bytes)
+----
+Trainer, if present (0 or 512 bytes)
+----
+PRG ROM data (16384 * x bytes)
+----
+CHR ROM data, if present (8192 * y bytes)
+----
+if present,  INST-ROM and PROM
+]
+package  nesjs  {
+User --> (drop or select NES file)
+(drop or select NES file) <-- RomData
+User <-- (display TV screen)
+User <-- (display dump console)
+User --> (input via JoyPad)
+User --> (specify stop/step/resume/reset)
+User --> (capture dump)
+}
+
+
+note right of nesjs
+nesjs builded from following sources
+─ src
+    ├── main.js(entry point)
+    ├── Nes.js
+    ├── Rom.js
+    ├── Cpu.js
+    ├── Ppu.js
+    ├── Apu.js
+    ├── Display.js
+    ├── Joypad.js
+    ├── Mapper.js
+    ├── Memory.js
+    ├── Register.js
+    └── Utility.js
+
+end note
+
+@enduml

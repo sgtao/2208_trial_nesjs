@@ -1,0 +1,96 @@
+@startuml
+
+Title 
+sequence boot of takahirox's nes-js
+refer GitHub : https://github.com/takahirox/nes-js
+end Title
+
+
+actor User << Human >>
+actor NES << Device >>
+box "CPU register" #LightBlue
+        actor CPU << Device >>
+        collections ACC_A
+        collections IDX_XY
+        collections SP
+        collections STS_P
+        collections PC
+end box
+box "CPU Memory" #LightPink
+        collections Header
+        collections "MAPPER\n(optional)"
+        collections "APU_reg"
+        collections "Joypad\nReg"
+        collections PRGROM
+end box
+box "PPU register" #LightGreen
+        actor PPU << Device >>
+        collections "PPU_\nCTRL"
+        collections "PPU_\nMASK"
+        collections "PPU_\nSTS"
+        collections "OAM_\nAD"
+        collections "PPU_\nAD"
+end box
+box "PPU Memory" #LightPink
+        collections VRAM
+        collections CHRROM
+        collections "NAME\nTable"
+        collections "PATTERN\nTable"
+end box
+database ROM <<Device>>
+actor Display <<Device>>
+
+note over NES : POWER_OFF
+User --> NES : turn on
+activate NES
+
+== Power ON ==
+NES --> ROM : activate ROM
+activate ROM
+
+NES --> CPU : bootup CPU
+activate CPU
+CPU-->STS_P : P = $34
+CPU-->ACC_A : A = $00
+CPU-->IDX_XY : X,Y = $00
+CPU-->SP : SP = $FD
+CPU-->STS_P : STS_P = $14
+CPU-->"APU_reg": $4000-$400F,$4015 = $00
+CPU-->"Joypad\nReg" : $4017 = $00
+note over STS_P : B,I
+note over ACC_A : $00
+note over IDX_XY : $00
+
+note over "APU_reg" : cleared
+note over "Joypad\nReg" : cleared
+
+PC<--ROM : read INT_HANDLER_ADR by addr. 0xFFFC
+note over PC : RST_HDR
+
+
+NES --> PPU : bootup PPU
+activate PPU
+PPU --> "PPU_\nSTS" : PPU_STS = $80
+note over "PPU_\nSTS" : VBank
+
+NES --> APU_reg : "bootup APU\n(clear status)"
+
+note over NES : RUN
+
+== NES RUN ==
+
+loop frame (max 60 fps)
+	NES --> Display : print measureFps()
+	loop (341 * 262 / 3)
+    	NES --> CPU : cpu.runCycle();
+    	CPU <-- ROM : load OPC
+        loop 3 times
+        	NES --> PPU : ppu.runCycle();
+	        PPU <-- ROM : load xxx
+        end
+    end
+    NES --> Display : requestAnimationFrame(this.runFunc);
+end
+
+
+@enduml

@@ -1,0 +1,91 @@
+@startuml
+
+Title 
+sequence of faithjs startup
+github : https://github.com/sairoutine/faithjs.git
+end Title
+
+actor User << Human >>
+actor faithjs << HTML >>
+actor Main << JavaScript >>
+actor NES << JavaScript >>
+box "CPU register" #LightBlue
+        actor CPU << in NES >>
+        collections ACC_A
+        collections IDX_XY
+        collections STS_P
+        collections PC
+end box
+box "CPU Memory" #LightPink
+        collections Header
+        collections "Joypad\nReg"
+        collections PROGROM
+end box
+box "PPU register" #LightGreen
+        actor PPU << in NES >>
+        collections "PPU_\nCTRL"
+        collections "PPU_\nSTS"
+        collections "PPU_\nAD"
+end box
+box "PPU Memory" #LightPink
+        collections VRAM
+        collections CHRROM
+        collections "NAME\nTable"
+        collections "PATTERN\nTable"
+end box
+actor MAPPER <<optional>>
+actor Display <<Canvas>>
+database ROM <<file>>
+
+== access ==
+User --> faithjs : access
+faithjs --> Main : win.onload
+Main <-- Display : canvas = dom.get
+Main --> NES : new NES(canvas)
+NES --> Display : initCanvas(真っ黒画面にする)
+Main --> faithjs : init._dom_events
+== Load, and Run ==
+User --> faithjs : rom_load
+faithjs --> Main : 
+activate Main
+Main --> ROM : read_local_file
+activate ROM
+Main <-- ROM : cb.nes_rom_change
+deactivate ROM
+
+Main --> NES : Pause
+NES --> Display : "(Before SetRom, win.cancelAnimationFrame)"
+Main --> NES : SetRom
+Main --> NES : Init
+activate NES
+NES --> Header : ParseHeader
+NES --> PROGROM : StorageInit
+activate PROGROM
+NES --> CHRROM : StorageInit
+activate CHRROM
+NES --> PPU : PpuInit
+activate PPU
+NES --> MAPPER : MapperSelect, Mapper.Init
+activate MAPPER
+NES --> CPU : CpuInit
+CPU --> ACC_A : set 0x00
+CPU --> IDX_XY : set 0x00
+CPU --> STS_P : set 0xFD
+CPU --> PC : Get16(0xFFFC)
+activate CPU
+Main --> Main : nes_start
+Main --> NES : Start
+deactivate Main
+== NES RUN ==
+NES --> CPU : CpuRun
+
+loop frame (描画するまでCPU, APU, PPUをrun)
+	CPU <-- PROGROM : Get(PC++)
+    CPU --> MAPPER : apper.CPUSync(CPUClock)
+    CPU --> PPU : PpuRun
+    PPU --> Display : if(PpuY === 240) ? ctx.putImageData(ImageData, 0, 0);
+    CPU --> CPU : ExecuteOpCode
+end
+
+
+@enduml
