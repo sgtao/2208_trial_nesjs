@@ -5,20 +5,20 @@ import './style.scss';
 //
 // import JS files
 // var NES = require('./NES');
-import { NES } from './NES.js';
-import { DBGROM } from './NES/debuggerNES';
+import { Nes } from './Nes.js';
 // 主要要素の取得
 var canvas, dbg_console;
 var nes;
 // 初期化
 function init() {
   canvas = document.querySelector('#NESdisplay');
-  nes = new NES(canvas);
+  nes = new Nes(canvas);
+  window.nes = nes;
   dbg_console = document.querySelector('#DBGconsole');
   // 画面の高さに応じてcanvasサイズ変更
   nes.display.resizeCanvas();
   // DOM イベントの初期化
-  initialize_dom_events();
+  initializeDomEvents();
   // console
 }
 window.onload = function () {
@@ -56,7 +56,7 @@ function read_url(url, cb) {
   request.send(null);
 }
 // DOMのイベントを設定
-function initialize_dom_events() {
+function initializeDomEvents() {
   if (typeof window.FileReader !== "undefined") {
     // ドラッグ&ドロップでROM読み込み
     window.addEventListener("dragenter",
