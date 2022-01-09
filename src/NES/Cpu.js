@@ -1,6 +1,6 @@
 // Cpu.js
 import { Register8bit, Register16bit } from './Register.js';
-
+import { Memory } from './Memory.js'
 class Cpu {
   constructor(nes){
     this.isCpu = true;
@@ -13,6 +13,8 @@ class Cpu {
     this.x = new Register8bit();
     this.y = new Register8bit();
     this.p = new CpuStatusRegister();
+    // RAM inside CPU
+    this.ram = new Memory(2 * 1024);  // 2KB
   }
   SetRom(rom) {
     this.rom = rom;
@@ -24,6 +26,105 @@ class Cpu {
     this.y.clear();
     this.sp.store(0xFD);
 
+  }
+  // load/store methods
+
+  /**
+   *
+   */
+  load(address) {
+    address = address & 0xFFFF;  // just in case
+
+    // 0x0000 - 0x07FF: 2KB internal RAM
+    // 0x0800 - 0x1FFF: Mirrors of 0x0000 - 0x07FF (repeats every 0x800 bytes)
+
+    if (address >= 0 && address < 0x2000)
+      return this.ram.load(address & 0x07FF);
+
+    // 0x2000 - 0x2007: PPU registers
+    // 0x2008 - 0x3FFF: Mirrors of 0x2000 - 0x2007 (repeats every 8 bytes)
+
+    // if (address >= 0x2000 && address < 0x4000)
+    //   return this.ppu.loadRegister(address & 0x2007);
+
+    // 0x4000 - 0x4017: APU, PPU and I/O registers
+    // 0x4018 - 0x401F: APU and I/O functionality that is normally disabled
+    // if (address >= 0x4000 && address < 0x4014)
+    //   return this.apu.loadRegister(address);
+
+    // if (address === 0x4014)
+    //   return this.ppu.loadRegister(address);
+
+    // if (address === 0x4015)
+    //   return this.apu.loadRegister(address);
+
+    // if (address === 0x4016)
+    //   return this.pad1.loadRegister();
+
+    // if (address >= 0x4017 && address < 0x4020)
+    //   return this.apu.loadRegister(address);
+
+
+    // cartridge space
+    // if (address >= 0x4020 && address < 0x6000)
+    //   return this.ram.load(address);
+
+    // 0x6000 - 0x7FFF: Battery Backed Save or Work RAM
+    // if (address >= 0x6000 && address < 0x8000)
+    //   return this.ram.load(address);
+
+    // 0x8000 - 0xFFFF: ROM
+    if (address >= 0x8000 && address < 0x10000)
+      return this.rom.load(address);
+
+    // when access blank addresses, return all-1.
+    return 0xFF;
+  }
+  store(addr, value) {
+    let address = addr & 0xFFFF;  // just in case
+
+    // 0x0000 - 0x07FF: 2KB internal RAM
+    // 0x0800 - 0x1FFF: Mirrors of 0x0000 - 0x07FF (repeats every 0x800 bytes)
+
+    if (address >= 0 && address < 0x2000)
+      return this.ram.store(address & 0x07FF, value);
+
+    // 0x2000 - 0x2007: PPU registers
+    // 0x2008 - 0x3FFF: Mirrors of 0x2000 - 0x2007 (repeats every 8 bytes)
+    // if (address >= 0x2000 && address < 0x4000)
+    //   return this.ppu.storeRegister(address & 0x2007, value);
+
+
+    // 0x4000 - 0x4017: APU, PPU and I/O registers
+    // 0x4018 - 0x401F: APU and I/O functionality that is normally disabled
+    // if (address >= 0x4000 && address < 0x4014)
+    //   return this.apu.storeRegister(address, value);
+
+    // if (address === 0x4014)
+    //   return this.ppu.storeRegister(address, value);
+
+    // if (address === 0x4015)
+    //   return this.apu.storeRegister(address, value);
+
+    // if (address === 0x4016)
+    //   return this.pad1.storeRegister(value);
+
+    // if (address >= 0x4017 && address < 0x4020)
+    //   return this.apu.storeRegister(address, value);
+
+
+    // cartridge space
+    // if (address >= 0x4020 && address < 0x6000)
+    //   return this.ram.store(address, value);
+
+
+    // 0x6000 - 0x7FFF: Battery Backed Save or Work RAM
+    // if (address >= 0x6000 && address < 0x8000)
+    //   return this.ram.store(address, value);
+
+    // 0x8000 - 0xFFFF: ROM
+    if (address >= 0x8000 && address < 0x10000)
+      return this.rom.store(address, value);
   }
   dump() {
     let buffer = '- cpu - ';
@@ -38,6 +139,13 @@ class Cpu {
     buffer += '\n\n';
     return buffer;
 
+  }
+  dump_memory_map() {
+    let cpu_memory = new Memory(0x10000); // 64KB
+    for (let i = 0; i < 0x10000; i++) {
+      cpu_memory[i] = this.load(i);
+    }
+    return cpu_memory.dump();
   }
 }
 class CpuStatusRegister extends Register8bit {
