@@ -34,7 +34,9 @@ function nes_rom_change(arraybuffer) {
     dump.putMessage(nes.rom.header_dump());
     dump.putMessage(nes.rom.header_info());
   }
-  // nes.Init();
+  nes.Init();
+  dump.putMessage('NES Init...');
+  dump.putMessage(nes.cpu.dump());
   // nes.Run();
 }
 // ローカル上のROMを読み込み

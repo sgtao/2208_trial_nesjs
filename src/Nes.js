@@ -21,7 +21,8 @@ class Nes {
     }
     return this.rom;
   }
-  init () {
+  Init () {
+    this.cpu.InitCpu();
   }
 }
 export { Nes };
