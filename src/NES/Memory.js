@@ -35,7 +35,6 @@ class Memory {
     this.data[address] = value;
   }
   dump () {
-    let buffer = '';
     // log.logHexarray(this.data);
     return log.toHexarray(this.data);
   }

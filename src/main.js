@@ -25,12 +25,14 @@ function init() {
 }
 // ROM をNESにセットする
 function nes_rom_change(arraybuffer) {
+  dump.putMessage('Rom load...');
   if (!nes.SetRom(arraybuffer)) {
     console.error("Can't get rom data (perhaps you don't set ArrayBuffer arguments or it's not nes rom format)");
     return;
   }
-  dump.putMessage('Rom load... Header is ');
+  dump.putMessage('Header is ');
   dump.putMessage(nes.rom.header_dump());
+  dump.putMessage(nes.rom.header_info());
   // nes.Init();
   // nes.Run();
 }
