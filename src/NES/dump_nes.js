@@ -14,6 +14,7 @@ class dump_nes {
     this.putMessage('add dump console..');
   }
   putMessage(str) {
+    if (DUMP_Level >= 1) console.log(str);
     this.area.value += str + '\n';
     this.area.scrollTop = this.area.scrollHeight;
   }

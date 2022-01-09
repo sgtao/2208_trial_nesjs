@@ -12,6 +12,11 @@ class Nes {
     this.ppu = new Ppu(this);
     this.rom = new Rom(this);
   }
+  SetRom(arrayBuffer) {
+    return this.rom.SetRom(arrayBuffer);
+    // this.rom.dump();
+    this.rom.header_dump();
+  }
   init () {
   }
 }
