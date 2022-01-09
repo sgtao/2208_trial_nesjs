@@ -13,7 +13,13 @@ class Nes {
     this.rom = new Rom(this);
   }
   SetRom(arrayBuffer) {
-    return this.rom.SetRom(arrayBuffer);
+    if (!this.rom.SetRom(arrayBuffer)){ // if failure
+      return false;
+    } else {
+      this.cpu.SetRom(this.rom);      
+      this.ppu.SetRom(this.rom);
+    }
+    return this.rom;
   }
   init () {
   }
