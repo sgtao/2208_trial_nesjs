@@ -4,26 +4,25 @@ import './styles/vendors/bootstrap-reboot.css';
 import './style.scss';
 //
 // import JS files
-// var NES = require('./NES');
 import { Nes } from './Nes.js';
+import { dump_nes } from './NES/dump_nes.js';
 // 主要要素の取得
 var canvas, dbg_console;
-var nes;
+var nes, dump;
 // 初期化
 function init() {
   canvas = document.querySelector('#NESdisplay');
   nes = new Nes(canvas);
   window.nes = nes;
-  dbg_console = document.querySelector('#DBGconsole');
   // 画面の高さに応じてcanvasサイズ変更
   nes.display.resizeCanvas();
   // DOM イベントの初期化
   initializeDomEvents();
   // console
+  dbg_console = document.querySelector('#DBGconsole');
+  dump = new dump_nes(dbg_console);
+  window.dump = dump;
 }
-window.onload = function () {
-  init ();
-};
 // ROM をNESにセットする
 function nes_rom_change(arraybuffer) {
   let nesrom = new DBGROM(arraybuffer, dbg_textarea);
@@ -89,3 +88,6 @@ function initializeDomEvents() {
     nes.display.resizeCanvas();
   });
 }
+document.addEventListener('DOMContentLoaded', function () {
+  init();
+});

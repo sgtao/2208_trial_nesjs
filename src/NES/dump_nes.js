@@ -10,9 +10,15 @@ const DUMP_Level = 1; // 1 is short message, 2 is long message
 class dump_nes {
   constructor (area) {
     this.area = area;
+    this.clrMessage();
+    this.putMessage('add dump console..');
   }
   putMessage(str) {
-    this.area.firstChild.appendData(str + '\n');
-    this.area.scrollTop = area.scrollHeight;
+    this.area.value += str + '\n';
+    this.area.scrollTop = this.area.scrollHeight;
+  }
+  clrMessage() {
+    this.area.value = '';
   }
 }
+export { dump_nes };
