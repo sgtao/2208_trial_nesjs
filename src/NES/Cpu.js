@@ -25,7 +25,7 @@ class Cpu {
     this.x.clear();
     this.y.clear();
     this.sp.store(0xFD);
-
+    this.ram.clear();
   }
   // load/store methods
 
@@ -78,16 +78,16 @@ class Cpu {
       return this.rom.load(address);
 
     // when access blank addresses, return all-1.
-    return 0xFF;
+    return 0x00;
   }
   store(addr, value) {
-    let address = addr & 0xFFFF;  // just in case
+    let address = addr & 0xFFFF;
 
     // 0x0000 - 0x07FF: 2KB internal RAM
     // 0x0800 - 0x1FFF: Mirrors of 0x0000 - 0x07FF (repeats every 0x800 bytes)
 
     if (address >= 0 && address < 0x2000)
-      return this.ram.store(address & 0x07FF, value);
+      return this.ram.store(address & 0x7FF, value);
 
     // 0x2000 - 0x2007: PPU registers
     // 0x2008 - 0x3FFF: Mirrors of 0x2000 - 0x2007 (repeats every 8 bytes)
@@ -123,8 +123,8 @@ class Cpu {
     //   return this.ram.store(address, value);
 
     // 0x8000 - 0xFFFF: ROM
-    if (address >= 0x8000 && address < 0x10000)
-      return this.rom.store(address, value);
+    // if (address >= 0x8000 && address < 0x10000)
+    return;
   }
   dump() {
     let buffer = '- cpu - ';
@@ -143,7 +143,7 @@ class Cpu {
   dump_memory_map() {
     let cpu_memory = new Memory(0x10000); // 64KB
     for (let i = 0; i < 0x10000; i++) {
-      cpu_memory[i] = this.load(i);
+      cpu_memory.store(i,this.load(i));
     }
     return cpu_memory.dump();
   }
