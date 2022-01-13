@@ -37,7 +37,7 @@ function nes_rom_change(arraybuffer) {
   nes.Init();
   dump.putMessage('NES Init...');
   dump.putMessage(nes.cpu.dump());
-  // dump.putMessage(nes.cpu.dump_memory_map());
+  dump.putMessage(nes.cpu.dump_memory_map());
   // nes.Run();
 }
 // ローカル上のROMを読み込み
