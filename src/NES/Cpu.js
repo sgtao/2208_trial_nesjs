@@ -1,6 +1,7 @@
 // Cpu.js
 import { Register8bit, Register16bit } from './Register.js';
-import { Memory } from './Memory.js'
+import { Memory } from './Memory.js';
+import { CPU_INTERRUPTS, CPU_OPS } from './CpuOpcodes.js';
 class Cpu {
   constructor(nes){
     this.isCpu = true;
