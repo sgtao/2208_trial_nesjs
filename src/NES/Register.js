@@ -19,15 +19,138 @@ class Register {
     }
     this.clear();
   }
-  clear () {
-    this.data[0] = 0x0;
+  /**
+   *
+   */
+  getWidth() {
+    return this.data.byteLength * 8;
   }
+
+  /**
+   *
+   */
   load() {
     return this.data[0];
   }
-  store (value) {
+
+  /**
+   *
+   */
+  loadBit(pos) {
+    return (this.data[0] >> pos) & 1;
+  }
+
+  /**
+   *
+   */
+  loadBits(offset, size) {
+    return (this.data[0] >> offset) & ((1 << size) - 1);
+  }
+
+  /**
+   *
+   */
+  store(value) {
     this.data[0] = value;
   }
+
+  /**
+   *
+   */
+  storeBit(pos, value) {
+    value = value & 1;  // just in case
+    this.data[0] = this.data[0] & ~(1 << pos) | (value << pos);
+  }
+
+  /**
+   *
+   */
+  storeBits(offset, size, value) {
+    var mask = (1 << size) - 1;
+    value = value & mask;  // just in case
+    this.data[0] = this.data[0] & ~(mask << offset) | (value << offset);
+  }
+
+  /**
+   *
+   */
+  clear() {
+    this.data[0] = 0;
+  }
+
+  /**
+   *
+   */
+  setBit(pos) {
+    this.storeBit(pos, 1);
+  }
+
+  /**
+   *
+   */
+  clearBit(pos) {
+    this.storeBit(pos, 0);
+  }
+
+  /**
+   *
+   */
+  isBitSet(pos) {
+    return this.loadBit(pos) === 1;
+  }
+
+  /**
+   *
+   */
+  increment() {
+    this.data[0]++;
+  }
+
+  /**
+   *
+   */
+  incrementBy2() {
+    this.data[0] += 2;
+  }
+
+  /**
+   *
+   */
+  add(value) {
+    this.data[0] += value;
+  }
+
+  /**
+   *
+   */
+  decrement() {
+    this.data[0]--;
+  }
+
+  /**
+   *
+   */
+  decrementBy2() {
+    this.data[0] -= 2;
+  }
+
+  /**
+   *
+   */
+  sub(value) {
+    this.data[0] -= value;
+  }
+
+  /**
+   *
+   */
+  shift(value) {
+    value = value & 1;  // just in case
+    var carry = this.loadBit(this.getWidth() - 1);
+    this.data[0] = (this.data[0] << 1) | value;
+    return carry;
+  }
+
   dump () {
     if (this.type === 1) {
       // log.logHex(this.data);

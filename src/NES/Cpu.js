@@ -27,6 +27,23 @@ class Cpu {
     this.sp.store(0xFD);
     this.ram.clear();
   }
+  /**
+   *
+   */
+  runCycle() {
+    if (this.isStall() !== true) {
+      let opc = this.fetch();
+      let op = this.decode(opc);
+
+      this.operate(op, opc);
+      this.stallCycle = op.cycle;
+    }
+
+    this.stallCycle--;
+  }
+  isStall() {
+    return this.stallCycle > 0;
+  }
   // load/store methods
 
   /**
@@ -126,6 +143,21 @@ class Cpu {
     // if (address >= 0x8000 && address < 0x10000)
     return;
   }
+
+  // processing methods
+  /**
+   *
+   */
+  fetch() {
+    let opc = this.load(this.pc.load());
+    this.pc.increment();
+    return opc;
+  }
+
+  // dump methods
+  /**
+   *
+   */
   dump() {
     let buffer = '- cpu - ';
     // let opc = this.load(this.pc.load());
