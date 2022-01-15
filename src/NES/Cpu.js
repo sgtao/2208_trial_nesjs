@@ -38,7 +38,8 @@ class Cpu {
     if (this.isStall() !== true) {
       let opc = this.fetch();
       let op = this.decode(opc);
-      console.log('opcode : (' + opc + ') ');
+      console.log('opcode : (' + opc + ') => ' );
+      console.dir(op);
 
       this.operate(op, opc);
       this.stallCycle = op.cycle;
@@ -180,7 +181,12 @@ class Cpu {
     this.pc.increment();
     return opc;
   }
-
+  /**
+   *
+   */
+  decode(opc) {
+    return CPU_OPS[opc];
+  }
   // dump methods
   /**
    *
