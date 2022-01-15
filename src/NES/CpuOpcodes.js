@@ -1,7 +1,7 @@
 // CpuOpcodes.js
 
 // Interrups
-var CPU_INTERRUPTS = {
+var CPU_INTS = {
   NMI:   { 'id': 0, 'addr': 0xFFFA },
   RESET: { 'id': 1, 'addr': 0xFFFC },
   IRQ:   { 'id': 2, 'addr': 0xFFFE },
@@ -380,4 +380,4 @@ var CPU_OPS = {
   0xFF: { 'instruction': CPU_INSTRUCTIONS.INV, 'cycle': 0, 'mode': null }
 }  ;
 
-export { CPU_INTERRUPTS, CPU_OPS };
+export { CPU_INTS, CPU_OPS };

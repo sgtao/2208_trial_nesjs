@@ -169,11 +169,42 @@ class Register {
 class Register8bit extends Register {
   constructor() {
     super(1);
+    this.isRegister8bit= true;
   }
+
 }
 class Register16bit extends Register {
   constructor() {
     super(2);
+    this.isRegister16bit = true;
   }
+  /**
+   *
+   */
+  loadHigherByte() {
+    return this.bytes[1];
+  }
+
+  /**
+   *
+   */
+  loadLowerByte() {
+    return this.bytes[0];
+  }
+
+  /**
+   *
+   */
+  storeHigherByte(value) {
+    this.bytes[1] = value;
+  }
+
+  /**
+   *
+   */
+  storeLowerByte(value) {
+    this.bytes[0] = value;
+  }
+
 }
 export { Register8bit, Register16bit };

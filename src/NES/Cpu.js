@@ -1,7 +1,7 @@
 // Cpu.js
 import { Register8bit, Register16bit } from './Register.js';
 import { Memory } from './Memory.js';
-import { CPU_INTERRUPTS, CPU_OPS } from './CpuOpcodes.js';
+import { CPU_INTS, CPU_OPS } from './CpuOpcodes.js';
 class Cpu {
   constructor(nes){
     this.isCpu = true;
@@ -27,6 +27,9 @@ class Cpu {
     this.y.clear();
     this.sp.store(0xFD);
     this.ram.clear();
+
+    // interrupt reset
+    this.interrupt(CPU_INTS.RESET)
   }
   /**
    *
@@ -35,6 +38,7 @@ class Cpu {
     if (this.isStall() !== true) {
       let opc = this.fetch();
       let op = this.decode(opc);
+      console.log('opcode : (' + opc + ') ');
 
       this.operate(op, opc);
       this.stallCycle = op.cycle;
@@ -44,6 +48,21 @@ class Cpu {
   }
   isStall() {
     return this.stallCycle > 0;
+  }
+
+  // interrupt method
+  /**
+   *  temporary implements
+   */
+  interrupt(int_obj) {
+    // console.log(int_obj);
+    this.jumpToInterruptHandler(int_obj);
+  }  
+  /**
+   *
+   */
+  jumpToInterruptHandler(int_obj) {
+    this.pc.store(this.load2Bytes(int_obj.addr));
   }
   // load/store methods
 
@@ -98,6 +117,13 @@ class Cpu {
     // when access blank addresses, return all-1.
     return 0x00;
   }
+  /**
+   *
+   */
+  load2Bytes(address) {
+    return this.load(address) | (this.load(address + 1) << 8);
+  }
+
   store(addr, value) {
     let address = addr & 0xFFFF;
 
