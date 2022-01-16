@@ -21,7 +21,7 @@ function convertDecToHexString(num, width, noPrefix = false) {
     base += '0';
 
   return prefix + (base + str).substr(-1 * width);
-};
+}
 /**
  * バイト配列を16進数表記文字列に変換する
  */
