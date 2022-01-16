@@ -37,6 +37,7 @@ function nes_rom_change(arraybuffer) {
   nes.Init();
   dump.putMessage('NES Init...');
   dump.putMessage(nes.cpu.dump());
+  dump.putMessage(nes.ppu.dump());
   // dump.putMessage(nes.cpu.dump_memory_map());
   nes.Run();
 }

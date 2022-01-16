@@ -8,6 +8,7 @@ class Cpu {
     this.isCpu = true;
     this.nes = nes;
     this.rom = null;
+    this.ppu = null;
     // registers
     this.pc = new Register16bit();
     this.sp = new Register8bit();
@@ -15,12 +16,15 @@ class Cpu {
     this.x = new Register8bit();
     this.y = new Register8bit();
     this.p = new CpuStatusRegister();
-    console.dir(this.p);
+    // console.dir(this.p);
     // RAM inside CPU
     this.ram = new Memory(2 * 1024);  // 2KB
   }
   SetRom(rom) {
     this.rom = rom;
+  }
+  SetPpu(ppu) {
+    this.ppu = ppu;
   }
   InitCpu() {
     this.p.store(0x34);
@@ -189,7 +193,7 @@ class Cpu {
     return CPU_OPS[opc];
   }
   /**
-   *
+   * temporary 
    */
   operate(op, opc) {
     return;

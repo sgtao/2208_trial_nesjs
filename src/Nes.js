@@ -11,6 +11,9 @@ class Nes {
     this.cpu = new Cpu(this);
     this.ppu = new Ppu(this);
     this.rom = new Rom(this);
+    this.cpu.SetPpu(this.ppu);
+    this.ppu.SetCpu(this.cpu);
+    this.ppu.SetDisplay(this.display);
   }
   SetRom(arrayBuffer) {
     if (!this.rom.SetRom(arrayBuffer)){ // if failure
@@ -23,6 +26,7 @@ class Nes {
   }
   Init () {
     this.cpu.InitCpu();
+    this.ppu.InitPpu();
   }
   Run () {
     // let cycles = (341 * 262 / 3) | 0; // TODO: temporal
