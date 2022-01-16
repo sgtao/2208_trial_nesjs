@@ -283,21 +283,47 @@ class Cpu {
     addr += this.x.data;
     return addr;
   }
-  
+
+  /**
+   *  update Status Register
+   */
+  // bit-7: Negative Flag
+  updateN(value) {
+    if ((value & 0x80) === 0)
+      this.p.clearN();
+    else
+      this.p.setN();
+  }
+  // bit-1: Zero Flag
+  updateZ(value) {
+    if ((value & 0xff) === 0)
+      this.p.setZ();
+    else
+      this.p.clearZ();
+  }
+  // bit-0: Carry Flag
+  updateC(value) {
+    if ((value & 0x100) === 0)
+      this.p.clearC();
+    else
+      this.p.setC();
+  }
   /**
    * NES CPU スタック
    * スタック領域: 0x0100~0x01FF
    */
+  getStackAddress() {
+    return this.sp.load() + 0x100;
+  }
   // スタックにpush
-  PushStack (data) {
-    // スタック領域: 0x0100~0x01FF
-    this.ram.store(0x100 + this.s.data, data);
-    this.s.decrement();
+  PushStack (value) {
+    this.store(this.getStackAddress(), value);
+    this.sp.decrement();
   }
   // スタックからpop
   PopStack() {
-    this.s.store((this.s.data + 1) & 0xFF);
-    return this.ram.load(0x100 + this.s.data);
+    this.sp.increment();
+    return this.load(this.getStackAddress());
   }
 
   // dump methods
