@@ -45,9 +45,9 @@ class Cpu {
       let opc = this.fetch();
       let op = this.decode(opc);
       // console.dir(op);
-      console.log(this.dump() + ' op=' + this.dump_cpu_op(op, opc));
       this.operate(op, opc);
       this.stallCycle = op.cycle;
+      console.log(this.dump());
     }
 
     this.stallCycle--;
@@ -198,30 +198,117 @@ class Cpu {
   operate(op, opc) {
     return {op, opc}; // temporary return
   }
+
+  /**
+   * NES CPU アドレッシングモード 
+   */
+
+  // Zero Page Addressing
+  // 上位アドレスとして$00、下位アドレスとして2番目のバイトを使用し実効アドレスとします。
+  GetAddressZeroPage() {
+    let addr = this.load(this.pc.load());
+    this.pc.increment();
+    return addr;
+  }
+
+  // Immediate Addressing
+  // 2番目のバイトをデータそのものとして使用します。
+  GetAddressImmediate() {
+    let addr = this.pc.data;
+    this.pc.increment();
+    return addr;
+  }
+
+  // Absolute Addressing
+  // 2番目のバイトを下位アドレス、 3番目のバイトを上位アドレスとして実効アドレスとします。
+  GetAddressAbsolute() {
+    var address = this.load2Byte(this.PC);
+    this.pc.incrementBy2()
+    return address;
+  }
+
+  // Indexed Zero Page Addressing X
+  // 上位アドレスとして$00、 下位アドレスとして2番目のバイトにインデックスレジスタXを加算した値を実効アドレスとします。
+  GetAddressZeroPageX() {
+    let addr = this.GetAddressZeroPage();
+    addr += this.x.date;
+    return (addr & 0xFF);
+  }
+
+
+  // Indexed Zero Page Addressing Y
+  // 上位アドレスとして$00、 下位アドレスとして2番目のバイトにインデックスレジスタYを加算した値を実効アドレスとします。
+  GetAddressZeroPageY() {
+    let addr = this.GetAddressZeroPage();
+    addr += this.y.date;
+    return (addr & 0xFF);
+  }
+
+  // Indexed Indirect Addressing
+  // 上位アドレスを$00とし、 また2番目のバイトにインデックスレジスタXを加算した値を下位アドレスとします。
+  // このアドレスに格納されている値を実効アドレスの下位バイト、
+  // そしてその次のアドレスに格納されている値を実効アドレスの上位バイトとします。
+  // このインクリメントにおいてキャリーは無視します。
+  GetAddressIndirectX() {
+    let addr = (this.GetAddressZeroPage() + this.x.data) & 0xFF;
+    return this.ram.load2Byte(addr);
+  }
+
+  // Indirect Indexed Addressing
+  // まず上位アドレスを$00とし、下位アドレスとして2番目のバイトを使用します。
+  // このアドレスに格納されている値を次の上位アドレス、
+  // その次のアドレスに格納されている値を次の下位アドレスとします。
+  // このときのインクリメントにおけるキャリーは無視します。
+  // 得られたアドレスにインデックスレジスタYを加算したものを実効アドレスとします。
+  GetAddressIndirectY() {
+    let addr = this.GetAddressAbsolute();
+    addr += this.y.data;
+    return ( addr & 0xFFFF );
+  }
+
+  // Indexed Absolute Addressing X
+  // 2番目のバイトを下位アドレス、3番目のバイトを上位アドレスとして、
+  // このアドレスにインデックスレジスタXを加算したものを実効アドレスとします。
+  GetAddressAbsoluteX() {
+    let addr = this.GetAddressAbsolute();
+    addr += this.x.data;
+    return addr;
+  }
+
+  // Indexed Absolute Addressing Y
+  // 2番目のバイトを下位アドレス、3番目のバイトを上位アドレスとして、
+  // このアドレスにインデックスレジスタYを加算したものを実効アドレスとします。
+  GetAddressAbsoluteY() {
+    let addr = this.GetAddressAbsolute();
+    addr += this.x.data;
+    return addr;
+  }
+  
   // dump methods
   /**
    *
    */
   dump() {
-    let buffer = '- cpu - ';
-    // let opc = this.load(this.pc.load());
-    // let op = this.decode(opc);
+    let buffer = 'cpu ';
+    let opc = this.load(this.pc.load());
+    let op = this.decode(opc);
     buffer += 'p:' + this.p.dump() + ' ';
     buffer += 'pc:' + this.pc.dump() + ' ';
     buffer += 'sp:' + this.sp.dump() + ' ';
     buffer += 'a:' + this.a.dump() + ' ';
     buffer += 'x:' + this.x.dump() + ' ';
     buffer += 'y:' + this.y.dump() + ' ';
-    // buffer += '\n\n';
+    buffer += this.dump_cpu_op(op, opc);
+    buffer += '\n';
     return buffer;
 
   }
   dump_cpu_op(op, opc) {
-    let buffer = '(0x' + log.toHex(opc) + '): ';
+    let buffer = 'opc=(0x' + log.toHex(opc) + '): ';
     buffer += op.instruction.name + ' ';
     if (op.mode != null )
       buffer += op.mode.name;
-    buffer += '\n\n';
+    buffer += ' ';
     return buffer;
   }
   dump_memory_map() {

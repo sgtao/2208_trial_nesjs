@@ -25,6 +25,9 @@ class Memory {
   load(address) {
     return this.data[address];
   }
+  load2Byte(address) {
+    return (this.data[address+1] << 8 ) | (this.data[address]);
+  }
   loadWithoutMapping(address) {
     return this.data[address];
   }
@@ -40,7 +43,7 @@ class Memory {
     // log.logHexarray(this.data);
     // return log.toHexarray(this.data);
     let buffer = '';
-    let previousIsZeroLine = false;
+    // let previousIsZeroLine = false;
     let offset = 0;
     let end = this.getCapacity();
     for (let i = offset; i < end; i++) {
