@@ -284,6 +284,22 @@ class Cpu {
     return addr;
   }
   
+  /**
+   * NES CPU スタック
+   * スタック領域: 0x0100~0x01FF
+   */
+  // スタックにpush
+  PushStack (data) {
+    // スタック領域: 0x0100~0x01FF
+    this.ram.store(0x100 + this.s.data, data);
+    this.s.decrement();
+  }
+  // スタックからpop
+  PopStack() {
+    this.s.store((this.s.data + 1) & 0xFF);
+    return this.ram.load(0x100 + this.s.data);
+  }
+
   // dump methods
   /**
    *
