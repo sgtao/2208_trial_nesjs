@@ -1,5 +1,6 @@
 // Ppu.js
-import { Register8bit, Register16bit } from './Register.js';
+/* import { Register8bit, Register16bit } from './Register.js'; */
+import { Register8bit } from './Register.js';
 import { Memory } from './Memory.js';
 class Ppu {
   constructor(nes) {
@@ -37,6 +38,100 @@ class Ppu {
   InitPpu() {
     console.dir(this.ppustatus);
     this.ppustatus.store(0x80);
+  }
+
+  // load/store register from Cpu
+  /**
+   * 0x2000 - 0x2007: PPU registers
+   * 0x4014         : Sprite DMA Register
+   * load register from Cpu
+   */
+  loadRegister(address) {
+    let value;
+    switch (address) {
+      // ppucontrol, ppumask is write only, so return 0
+      case 0x2000:
+      case 0x2001:
+        return 0;
+
+      // ppustatus load
+      case 0x2002:
+        value = this.ppustatus.load();
+        // this.ppustatus.clearVBlank();
+        // this.registerFirstStore = true;
+        return value;
+
+      // oamaddr is write only, so return 0
+      case 0x2003:
+        return 0;
+
+      // oamdata load
+      case 0x2004:
+        return this.oamRam.load(this.oamaddr.load());
+
+      // ppuscroll, ppuaddr is write only, so return 0
+      case 0x2005:
+      case 0x2006:
+        return 0;
+
+      // ppudata load
+      case 0x2007:
+        value = this.oamdma.load(value);
+        return value;
+    }
+
+    return 0;
+  }
+  /**
+   * 0x2000 - 0x2007: PPU registers
+   * 0x4014         : Sprite DMA Register
+   * store register from Cpu
+   */
+  storeRegister(address, value) {
+    switch (address) {
+
+      // ppuctrl store
+      case 0x2000:
+        this.ppuctrl.store(value);
+        break;
+
+      // ppumask store
+      case 0x2001:
+        this.ppumask.store(value);
+        break;
+
+      // oamaddr store
+      case 0x2003:
+        this.oamaddr.store(value);
+        break;
+
+      // oamdata store
+      case 0x2004:
+        this.oamdata.store(value);
+        break;
+
+      // ppuscroll store
+
+      case 0x2005:
+        this.ppuscroll.store(value);
+        break;
+
+      // ppuaddr store
+      case 0x2006:
+        this.ppuaddr.store(value);
+        break;
+
+      // ppudata store
+      case 0x2007:
+        this.ppudata.store(value);
+        break;
+
+      // oamdma store
+
+      case 0x4014:
+        this.oamdma.store(value);
+        break;
+    }
   }
 
   // dump methods
