@@ -25,12 +25,13 @@ class Nes {
     this.cpu.InitCpu();
   }
   Run () {
-    var cycles = (341 * 262 / 3) | 0; // TODO: temporal
+    // let cycles = (341 * 262 / 3) | 0; // TODO: temporal
+    let cycles = 32 ; // TODO: temporal
     for (var i = 0; i < cycles; i++) {
       this.runCycle();
     }
-    if (this.state === this.STATES.RUN)
-      requestAnimationFrame(this.runFunc);
+    // if (this.state === this.STATES.RUN)
+    //   requestAnimationFrame(this.runFunc);
   }
   /**
    *

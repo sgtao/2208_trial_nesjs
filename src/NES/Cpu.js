@@ -2,6 +2,7 @@
 import { Register8bit, Register16bit } from './Register.js';
 import { Memory } from './Memory.js';
 import { CPU_INTS, CPU_OPS } from './CpuOpcodes.js';
+import { log } from './logger.js';
 class Cpu {
   constructor(nes){
     this.isCpu = true;
@@ -14,6 +15,7 @@ class Cpu {
     this.x = new Register8bit();
     this.y = new Register8bit();
     this.p = new CpuStatusRegister();
+    console.dir(this.p);
     // RAM inside CPU
     this.ram = new Memory(2 * 1024);  // 2KB
   }
@@ -38,9 +40,8 @@ class Cpu {
     if (this.isStall() !== true) {
       let opc = this.fetch();
       let op = this.decode(opc);
-      console.log('opcode : (' + opc + ') => ' );
-      console.dir(op);
-
+      // console.dir(op);
+      console.log(this.dump() + ' op=' + this.dump_cpu_op(op, opc));
       this.operate(op, opc);
       this.stallCycle = op.cycle;
     }
@@ -187,6 +188,12 @@ class Cpu {
   decode(opc) {
     return CPU_OPS[opc];
   }
+  /**
+   *
+   */
+  operate(op, opc) {
+    return;
+  }
   // dump methods
   /**
    *
@@ -195,15 +202,23 @@ class Cpu {
     let buffer = '- cpu - ';
     // let opc = this.load(this.pc.load());
     // let op = this.decode(opc);
-    buffer += 'p:' + this.p.Status_dump() + ' ';
+    buffer += 'p:' + this.p.dump() + ' ';
     buffer += 'pc:' + this.pc.dump() + ' ';
     buffer += 'sp:' + this.sp.dump() + ' ';
     buffer += 'a:' + this.a.dump() + ' ';
     buffer += 'x:' + this.x.dump() + ' ';
     buffer += 'y:' + this.y.dump() + ' ';
-    buffer += '\n\n';
+    // buffer += '\n\n';
     return buffer;
 
+  }
+  dump_cpu_op(op, opc) {
+    let buffer = '(0x' + log.toHex(opc) + '): ';
+    buffer += op.instruction.name + ' ';
+    if (op.mode != null )
+      buffer += op.mode.name;
+    buffer += '\n\n';
+    return buffer;
   }
   dump_memory_map() {
     let cpu_memory = new Memory(0x10000); // 64KB
@@ -214,14 +229,130 @@ class Cpu {
   }
 }
 class CpuStatusRegister extends Register8bit {
-  constructor () {
+  constructor() {
     super();
     this.isCpuStatusRegister = true;
+    this.N_BIT= 7;
+    this.V_BIT= 6;
+    this.A_BIT= 5;  // unused bit. A is random name
+    this.B_BIT= 4;
+    this.D_BIT= 3;
+    this.I_BIT= 2;
+    this.Z_BIT= 1;
+    this.C_BIT= 0;
   }
-  Status_dump() {
-    let buffer = '';
-    buffer += this.dump();
+  isN() {
+    return this.isBitSet(this.N_BIT);
+  }
+
+  setN() {
+    this.setBit(this.N_BIT);
+  }
+
+  clearN() {
+    this.clearBit(this.N_BIT);
+  }
+
+  isV() {
+    return this.isBitSet(this.V_BIT);
+  }
+
+  setV() {
+    this.setBit(this.V_BIT);
+  }
+
+  clearV() {
+    this.clearBit(this.V_BIT);
+  }
+
+  isA() {
+    return this.IsBitSet(this.A_BIT);
+  }
+
+  setA() {
+    this.setBit(this.A_BIT);
+  }
+
+  clearA() {
+    this.clearBit(this.A_BIT);
+  }
+
+  isB() {
+    return this.isBitSet(this.B_BIT);
+  }
+
+  setB() {
+    this.setBit(this.B_BIT);
+  }
+
+  clearB() {
+    this.clearBit(this.B_BIT);
+  }
+
+  isD() {
+    return this.isBitSet(this.D_BIT);
+  }
+
+  setD() {
+    this.setBit(this.D_BIT);
+  }
+
+  clearD() {
+    this.clearBit(this.D_BIT);
+  }
+
+  isI() {
+    return this.isBitSet(this.I_BIT);
+  }
+
+  setI() {
+    this.setBit(this.I_BIT);
+  }
+
+  clearI() {
+    this.clearBit(this.I_BIT);
+  }
+
+  isZ() {
+    return this.isBitSet(this.Z_BIT);
+  }
+
+  setZ() {
+    this.setBit(this.Z_BIT);
+  }
+
+  clearZ() {
+    this.clearBit(this.Z_BIT);
+  }
+
+  isC() {
+    return this.isBitSet(this.C_BIT);
+  }
+
+  setC() {
+    this.setBit(this.C_BIT);
+  }
+
+  clearC() {
+    this.clearBit(this.C_BIT);
+  }
+
+  // dump
+
+  dump() {
+    var buffer = '';
+    buffer += Register8bit.prototype.dump.call(this);
+    buffer += '(';
+    buffer += this.isN() ? 'N' : '-';
+    buffer += this.isV() ? 'V' : '-';
+    buffer += this.isB() ? 'B' : '-';
+    buffer += this.isD() ? 'D' : '-';
+    buffer += this.isI() ? 'I' : '-';
+    buffer += this.isZ() ? 'Z' : '-';
+    buffer += this.isC() ? 'C' : '-';
+    buffer += ')';
     return buffer;
   }
+
 }
 export { Cpu };
