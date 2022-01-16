@@ -329,14 +329,81 @@ class Cpu {
   /* 
    * NES CPU オペコード
    */
-  // Aレジスタにロード
+
+  // LDA : Aレジスタにロード
   opLDA(address) {
     let data = this.load(address);
     this.a.store(data);
     this.updateN(data);
     this.updateZ(data);
   }
+  // LDX : Xレジスタにロード
+  opLDX(address) {
+    let data = this.load(address);
+    this.x.store(data);
+    this.updateN(data);
+    this.updateZ(data);
+  }
+  // LDY : Yレジスタにロード
+  opLDY(address) {
+    let data = this.load(address);
+    this.y.store(data);
+    this.updateN(data);
+    this.updateZ(data);
+  }
 
+  // STA : Aからメモリにストア
+  opSTA(address) {
+    this.store(address, this.a.load());
+  }
+  // STX : xからメモリにストア
+  opSTX(address) {
+    this.store(address, this.x.load());
+  }
+  // STY : Yからメモリにストア
+  opSTY(address) {
+    this.store(address, this.y.load());
+  }
+
+  // TAX : AレジスタをXレジスタにコピー
+  opTAX() {
+    let data = this.a.load();
+    this.x.store(data);
+    this.updateN(data);
+    this.updateZ(data);
+  }
+  // TAY : AレジスタをYレジスタにコピー
+  opTAY() {
+    let data = this.a.load();
+    this.y.store(data);
+    this.updateN(data);
+    this.updateZ(data);
+  }
+  // TSX : SレジスタをXレジスタにコピー
+  opTSX() {
+    let data = this.s.load();
+    this.x.store(data);
+    this.s.clearN();
+    this.s.clearZ();
+  }
+  // TXA : XレジスタをAレジスタにコピー
+  opTXA() {
+    let data = this.x.load();
+    this.a.store(data);
+    this.updateN(data);
+    this.updateZ(data);
+  }
+  // TXS : XレジスタをSレジスタにコピー
+  opTXS() {
+    this.s.store(this.x.load());
+  }
+  // TYA : YレジスタをAレジスタにコピー
+  opTYA() {
+    let data = this.y.load();
+    this.a.store(data);
+    this.updateN(data);
+    this.updateZ(data);
+  }
 
 
   // dump methods
