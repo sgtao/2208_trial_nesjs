@@ -1,7 +1,7 @@
 // Cpu.js
 import { Register8bit, Register16bit } from './Register.js';
 import { Memory } from './Memory.js';
-import { CPU_INTS, CPU_OPS } from './CpuOpcodes.js';
+import { CPU_INTS, CPU_ADDRESSINGS, CPU_INSTRUCTIONS, CPU_OPS } from './CpuOpcodes.js';
 import { log } from './logger.js';
 class Cpu {
   constructor(nes){
@@ -196,12 +196,125 @@ class Cpu {
    * temporary 
    */
   operate(op, opc) {
-    return {op, opc}; // temporary return
+    let address = 0;
+    if (op.instruction.id !== CPU_INSTRUCTIONS.INV.id) 
+      this.getAddressWithAddressingMode(op);
+
+    switch (op.instruction.id) {
+      case CPU_INSTRUCTIONS.INV.id: // Invalid op , temporary skip
+        console.error('invalid operand')
+        break;
+      case CPU_INSTRUCTIONS.LDA.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.LDX.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.LDY.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.STA.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.STX.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.STY.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.TAX.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.TAY.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.TSX.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.TXA.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.TXS.id:
+        this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.TYA.id:
+        this.opADC(address); 
+        break;
+      default: 
+        // temporary skip.
+        console.error('Cpu.operand is not implemented yet');
+        // throw new Error('Cpu.operate: Invalid instruction, pc=' + Utility.convertDecToHexString(this.pc.load() - 1) + ' opc=' + Utility.convertDecToHexString(opc, 2) + ' name=' + op.instruction.name);
+        break;
+    }
+    return opc; // temporary return
   }
 
   /**
    * NES CPU アドレッシングモード 
    */
+  // get Address Interface
+  getAddressWithAddressingMode (op) {
+    let address;
+    // get address
+    switch (op.mode.id) {
+      case CPU_ADDRESSINGS.IMMEDIATE.id: {
+        address = this.getAddressImmediate();
+        break;
+      }
+      case CPU_ADDRESSINGS.ABSOLUTE.id: {
+        address = this.getAddressAbsolute();
+        break;
+      }
+      case CPU_ADDRESSINGS.INDEXED_ABSOLUTE_X.id: {
+        address = this.getAddressAbsoluteX();
+        break;
+      }
+      case CPU_ADDRESSINGS.INDEXED_ABSOLUTE_Y.id: {
+        address = this.getAddressAbsoluteY();
+        break;
+      }
+      case CPU_ADDRESSINGS.ZERO_PAGE.id: {
+        address = this.getAddressZeroPage();
+        break;
+      }
+      case CPU_ADDRESSINGS.INDEXED_ZERO_PAGE_X.id: {
+        address = this.getAddressZeroPageX();
+        break;
+      }
+      case CPU_ADDRESSINGS.INDEXED_ZERO_PAGE_Y.id: {
+        address = this.getAddressZeroPageY();
+        break;
+      }
+      case CPU_ADDRESSINGS.IMPLIED.id: {
+        address = 0;
+        break;
+      }
+      case CPU_ADDRESSINGS.ACCUMULATOR.id: {
+        address = 0;
+        break;
+      }
+      case CPU_ADDRESSINGS.INDIRECT.id: {
+        address = this.getAddressZeroPage();
+        break;
+      }
+      case CPU_ADDRESSINGS.INDEXED_INDIRECT_X.id: {
+        address = this.getAddressIndirectX();
+        break;
+      }
+      case CPU_ADDRESSINGS.INDEXED_INDIRECT_Y.id: {
+        address = this.getAddressIndirectY();
+        break;
+      }
+      case CPU_ADDRESSINGS.RELATIVE.id: {
+        address = this.getAddressRelative();
+        break;
+      }
+      default:
+        throw new Error('Cpu: Unkown addressing mode.');
+        // break;
+    }
+    return address;
+  }
 
   // Zero Page Addressing
   // 上位アドレスとして$00、下位アドレスとして2番目のバイトを使用し実効アドレスとします。
@@ -222,7 +335,7 @@ class Cpu {
   // Absolute Addressing
   // 2番目のバイトを下位アドレス、 3番目のバイトを上位アドレスとして実効アドレスとします。
   getAddressAbsolute() {
-    let addr = this.load2Byte(this.pc.load());
+    let addr = this.load2Bytes(this.pc.load());
     this.pc.incrementBy2()
     return addr;
   }
@@ -281,6 +394,16 @@ class Cpu {
   getAddressAbsoluteY() {
     let addr = this.getAddressAbsolute();
     addr += this.x.load();
+    return addr;
+  }
+
+  // Relative Addressing
+  // アドレス「PC + IM8」を取得
+  getAddressRelative() {
+    let addr = this.getAddressZeroPage();
+    if (addr & 0x80) {
+      addr |= 0xff00;
+    }
     return addr;
   }
 
@@ -405,6 +528,21 @@ class Cpu {
     this.updateZ(data);
   }
 
+  // ADC : (A + メモリ + キャリーフラグ) を演算して結果をAへ格納
+  opADC(address) {
+    let oldA = this.a.load();
+    let data = this.load(address);
+    let carry = this.p.isC() ? 1 : 0;
+    let result = data + carry;
+    this.a.store(result);
+    this.updateN(data);
+    this.updateZ(data);
+    this.updateC(result);
+    if (!((oldA ^ data) & 0x80) && ((data ^ result) & 0x80))
+      this.p.setV();
+    else
+      this.p.clearV();
+  }
 
   // dump methods
   /**

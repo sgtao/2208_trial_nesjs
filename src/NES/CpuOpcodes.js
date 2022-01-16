@@ -380,4 +380,4 @@ var CPU_OPS = {
   0xFF: { 'instruction': CPU_INSTRUCTIONS.INV, 'cycle': 0, 'mode': null }
 }  ;
 
-export { CPU_INTS, CPU_OPS };
+export { CPU_INTS, CPU_ADDRESSINGS, CPU_INSTRUCTIONS, CPU_OPS };
