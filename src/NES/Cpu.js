@@ -240,6 +240,12 @@ class Cpu {
       case CPU_INSTRUCTIONS.TYA.id:
         this.opADC(address); 
         break;
+      case CPU_INSTRUCTIONS.ASL.id:
+        if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
+          this.a.store(this.ASL_Sub(this.a.load()));
+        else
+          this.opADC(address); 
+        break;
       default: 
         // temporary skip.
         console.error('Cpu.operand is not implemented yet');
@@ -543,6 +549,33 @@ class Cpu {
     else
       this.p.clearV();
   }
+  // AND : AレジスタとAND演算をする
+  opAND(address) {
+    let src1 = this.a.load();
+    let src2 = this.load(address);
+    var result = src1 & src2;
+    this.a.store(result);
+    this.updateN(result);
+    this.updateZ(result);
+  }
+  // ASL : Aまたはメモリを左へシフトします。
+  opASL(address) {
+
+  }
+// 左シフト
+  ASL_Sub(data) {
+    this.p.store(this.p.load() & 0xFE | (data >> 7));
+    let result = (data << 1)
+    this.updateN(result)
+    this.updateZ(result);
+    this.updateC(result);
+    return result & 0xff;
+  }
+  ASL(address) {
+    this.Set(address, this.ASL_Sub(this.Get(address)));
+  }
+
+
 
   // dump methods
   /**

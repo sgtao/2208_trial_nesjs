@@ -38,8 +38,8 @@ function nes_rom_change(arraybuffer) {
   dump.putMessage('NES Init...');
   dump.putMessage(nes.cpu.dump());
   dump.putMessage(nes.ppu.dump());
-  // dump.putMessage(nes.cpu.dump_memory_map());
   nes.Run();
+  // dump.putMessage(nes.cpu.dump_memory_map());
 }
 // ローカル上のROMを読み込み
 function read_local_file(fileObj, cb) {
