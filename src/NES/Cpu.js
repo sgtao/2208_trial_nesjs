@@ -58,7 +58,7 @@ class Cpu {
 
   // interrupt method
   interrupt(cpu_int) {
-    console.log(cpu_int);
+    // console.log(cpu_int);
     switch (cpu_int.id) {
       case CPU_INTS.NMI.id:
         this.pushStack2Bytes(this.pc.load());
@@ -88,18 +88,12 @@ class Cpu {
         console.error('Cpu.interrupt is invalid id:' + cpu_int.id);
         return;
     }
-    this.jumpToInterruptHandler(cpu_int.addr);
+    // jump to InterruptHandler
+    this.pc.store(this.load2Bytes(cpu_int.addr));
   }  
-  /**
-   *
-   */
-  jumpToInterruptHandler(address) {
-    this.pc.store(this.load2Bytes(address));
-  }
-  // load/store methods
 
   /**
-   *
+   * load/store methods
    */
   load(address) {
     address = address & 0xFFFF;  // just in case
@@ -615,12 +609,12 @@ class Cpu {
     return this.sp.load() + 0x100;
   }
   // スタックにpush
-  PushStack (value) {
+  pushStack (value) {
     this.store(this.getStackAddress(), value);
     this.sp.decrement();
   }
   // スタックからpop
-  PopStack() {
+  popStack() {
     this.sp.increment();
     return this.load(this.getStackAddress());
   }
