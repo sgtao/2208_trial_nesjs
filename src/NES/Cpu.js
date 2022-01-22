@@ -195,9 +195,9 @@ class Cpu {
    */
   operate(op, opc) {
     let address = 0;
-    if (op.instruction.id !== CPU_INSTRUCTIONS.INV.id) 
+    if (op.instruction.id !== CPU_INSTRUCTIONS.INV.id) {
       address = this.getAddressWithAddressingMode(op);
-
+    }
     switch (op.instruction.id) {
       case CPU_INSTRUCTIONS.INV.id: // Invalid op , temporary skip
         console.error('invalid operand')
@@ -331,6 +331,30 @@ class Cpu {
       case CPU_INSTRUCTIONS.RTI.id:
         this.opRTI();
         break;
+      case CPU_INSTRUCTIONS.BCC.id:
+        this.opBranch(address, !this.p.isC());
+        break;
+      case CPU_INSTRUCTIONS.BCS.id:
+        this.opBranch(address, this.p.isC());
+        break;
+      case CPU_INSTRUCTIONS.BEQ.id:
+        this.opBranch(address, this.p.isZ());
+        break;
+      case CPU_INSTRUCTIONS.BMI.id:
+        this.opBranch(address, this.p.isN());
+        break;
+      case CPU_INSTRUCTIONS.BNE.id:
+        this.opBranch(address, !this.p.isZ());
+        break;
+      case CPU_INSTRUCTIONS.BPL.id:
+        this.opBranch(address, !this.p.isN());
+        break;
+      case CPU_INSTRUCTIONS.BVC.id:
+        this.opBranch(address, !this.p.isV());
+        break;
+      case CPU_INSTRUCTIONS.BVS.id:
+        this.opBranch(address, this.p.isV());
+        break;
       //
       // not implemented oprands
       default: 
@@ -383,7 +407,7 @@ class Cpu {
         break;
       }
       case CPU_ADDRESSINGS.ACCUMULATOR.id: {
-        address = 0;
+        address = this.a.load();
         break;
       }
       case CPU_ADDRESSINGS.INDIRECT.id: {
@@ -400,6 +424,7 @@ class Cpu {
       }
       case CPU_ADDRESSINGS.RELATIVE.id: {
         address = this.getAddressRelative();
+        // console.log('relative addressing : ' + address);
         break;
       }
       default:
@@ -493,10 +518,8 @@ class Cpu {
   // Relative Addressing
   // アドレス「PC + IM8」を取得
   getAddressRelative() {
-    let addr = this.getAddressZeroPage();
-    if (addr & 0x80) {
-      addr |= 0xff00;
-    }
+    let addr = this.load(this.pc.load());
+    this.pc.increment();
     return addr;
   }
 
@@ -828,6 +851,15 @@ class Cpu {
   opRTI() {
     this.p.store(this.popStack());
     this.pc.store(this.popStack2Bytes());
+  }
+  
+  // B** : ブランチ処理(flagがtrueの時、pc+(Relative)addressへjumpする)
+  opBranch(address, flag) {
+    if (flag) {
+      // console.log('jump from ' + this.pc.load() + ' to  +' + address);
+      this.pc.add(address);
+      // console.log(' --> ' + this.pc.load());
+    }
   }
 
   // End Of Operands
