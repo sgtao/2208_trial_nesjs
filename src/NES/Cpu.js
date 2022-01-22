@@ -283,6 +283,27 @@ class Cpu {
       case CPU_INSTRUCTIONS.INY.id:
         this.y.store(this.opINC_Sub(this.y.load()));
         break;
+      case CPU_INSTRUCTIONS.LSR.id:
+        if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
+          this.a.store(this.opLSR_Sub(this.a.load()));
+        else
+          this.opLSR(address);
+        break;
+      case CPU_INSTRUCTIONS.ORA.id:
+        this.opORA(address);
+        break;
+      case CPU_INSTRUCTIONS.ROL.id:
+        if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
+          this.a.store(this.opROL_Sub(this.a.load()));
+        else
+          this.opROL(address);
+        break;
+      case CPU_INSTRUCTIONS.ROR.id:
+        if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
+          this.a.store(this.opRROR_Sub(this.a.load()));
+        else
+          this.opROR(address);
+        break;
       //
       // not implemented oprands
       default: 
@@ -590,25 +611,22 @@ class Cpu {
   }
   // AND : AレジスタとAND演算をする。(結果はAへ格納)
   opAND(address) {
-    let src1 = this.a.load();
-    let src2 = this.load(address);
-    var result = src1 & src2;
+    let result = this.a.load() & this.load(address);
     this.a.store(result);
     this.updateN(result);
     this.updateZ(result);
   }
   // ASL : Aまたはメモリを左へシフトします。
-  opASL(address) {
-    this.store(address, this.opASL_Sub(this.load(address)));
-  }
   // 左シフト
   opASL_Sub(data) {
-    this.p.store(this.p.load() & 0xFE | (data >> 7));
     let result = (data << 1)
     this.updateN(result)
     this.updateZ(result);
     this.updateC(result);
     return result & 0xff;
+  }
+  opASL(address) {
+    this.store(address, this.opASL_Sub(this.load(address)));
   }
   // BIT : Aとメモリをビット比較演算します。
   opBIT(address) {
@@ -644,9 +662,7 @@ class Cpu {
   }
   // EOR : Aとメモリを論理XOR演算します。(結果はAへ格納)
   opEOR(address) {
-    let src1 = this.a.load();
-    let src2 = this.load(address);
-    var result = src1 ^ src2;
+    let result = this.a.load() ^ this.load(address);
     this.a.store(result);
     this.updateN(result);
     this.updateZ(result);
@@ -660,6 +676,57 @@ class Cpu {
     this.updateN(result);
     this.updateZ(result);
     return result & 0xFF;
+  }
+  // LSR : Aまたはメモリを右へシフトします。
+  // 右シフト
+  opLSR_Sub(data) {
+    let result = (data >> 1)
+    this.p.clearN();
+    this.updateZ(result);
+    if ((data & 1) == 0)
+      self.p.clearC();
+    else
+      self.p.setC();
+    return result & 0xff;
+  }
+  opLSR(address) {
+    this.store(address, this.opLSR_Sub(this.load(address)));
+  }
+  // ORA : Aとメモリを論理OR演算をする。(結果はAへ格納)
+  opORA(address) {
+    let result = this.a.load() | this.load(address);
+    this.a.store(result);
+    this.updateN(result);
+    this.updateZ(result);
+  }
+  // ROL : Aまたはメモリを左へローテートします。
+  // 左ローテート
+  opROL_Sub(data) {
+    let c = self.p.isC() ? 1 : 0;
+    let result = (data << 1) | c;
+    self.updateN(result);
+    self.updateZ(result);
+    self.updateC(result);
+    return result & 0xff;
+  }
+  opROL(address) {
+    this.store(address, this.opROL_Sub(this.load(address)));
+  }
+  // ROR : Aまたはメモリを右へローテートします。
+  // 右ローテート
+  opROR_Sub(data) {
+    let c = this.p.isC() ? 0x80 : 0x00;
+    let result = (data >> 1) | c;
+    this.updateN(result);
+    this.updateZ(result);
+    if ((data & 1) == 0)
+      this.p.clearC();
+    else
+      this.p.setC();
+    return result & 0xff;
+  }
+  opROR(address) {
+    this.store(address, this.opROR_Sub(this.load(address)));
   }
 
   // End Of Operands
