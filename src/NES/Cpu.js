@@ -57,18 +57,44 @@ class Cpu {
   }
 
   // interrupt method
-  /**
-   *  temporary implements
-   */
-  interrupt(int_obj) {
-    // console.log(int_obj);
-    this.jumpToInterruptHandler(int_obj);
+  interrupt(cpu_int) {
+    console.log(cpu_int);
+    switch (cpu_int.id) {
+      case CPU_INTS.NMI.id:
+        this.pushStack2Bytes(this.pc.load());
+        this.pushStack(this.p.load());
+        this.p.setI();
+        this.p.clearB();
+        break;
+      case CPU_INTS.RESET.id:
+        this.p.setI();
+        break;
+      case CPU_INTS.IRQ.id:
+        if (this.p.isI() === true) {
+          return;
+        }
+        this.pushStack2Bytes(this.pc.load());
+        this.pushStack(this.p.load());
+        this.p.setI();
+        this.p.clearB();
+        break;
+      case CPU_INTS.BRK.id:
+        this.pushStack2Bytes(this.pc.load());
+        this.pushStack(this.p.load());
+        this.p.setI();
+        this.p.setB();
+        break;
+      default:
+        console.error('Cpu.interrupt is invalid id:' + cpu_int.id);
+        return;
+    }
+    this.jumpToInterruptHandler(cpu_int.addr);
   }  
   /**
    *
    */
-  jumpToInterruptHandler(int_obj) {
-    this.pc.store(this.load2Bytes(int_obj.addr));
+  jumpToInterruptHandler(address) {
+    this.pc.store(this.load2Bytes(address));
   }
   // load/store methods
 
@@ -383,6 +409,12 @@ class Cpu {
       case CPU_INSTRUCTIONS.SEI.id:
         this.p.setI();
         break;
+      // Other Instructions
+      case CPU_INSTRUCTIONS.BRK.id:
+        this.opBRK();
+        break;
+      case CPU_INSTRUCTIONS.NOP.id:
+        break;
       //
       // not implemented oprands
       default: 
@@ -674,7 +706,7 @@ class Cpu {
   }
   // TXS : XレジスタをSレジスタにコピー
   opTXS() {
-    this.p.store(this.x.load());
+    this.sp.store(this.x.load());
   }
   // TYA : YレジスタをAレジスタにコピー
   opTYA() {
@@ -889,6 +921,15 @@ class Cpu {
       this.pc.add(address);
       // console.log(' --> ' + this.pc.load());
     }
+  }
+
+  // BRK : ソフトウェア割り込みを起こします。
+  // Forced Interrupt with PC + 2 to SP, P to S, set status(B)
+  opBRK() {
+    this.pc.increment();
+    this.p.setA();
+    this.p.setB();
+    this.interrupt(CPU_INTS.BRK);
   }
 
   // End Of Operands
