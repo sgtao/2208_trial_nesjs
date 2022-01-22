@@ -40,7 +40,6 @@ function nes_rom_change(arraybuffer) {
   dump.putMessage(nes.ppu.dump());
   nes.Run();
   dump.putMessage('after Run.');
-  dump.putMessage(nes.cpu.dump_memory_map());
 }
 // ローカル上のROMを読み込み
 function read_local_file(fileObj, cb) {
@@ -88,6 +87,20 @@ function initializeDomEvents() {
         // ROM の場所
         var url = document.getElementById("romlist").value;
         read_url(url, nes_rom_change);
+      }, false);
+    // Debug Console をクリア
+    document.querySelector("#clear_console").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.clrMessage();
+        dump.putMessage('clear message...\n');
+      }, false);
+    // Cpu memory をダンプ
+    document.querySelector("#dump_cpumem").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.putMessage('\n\n# Dump CPU Memory');
+        dump.putMessage(nes.cpu.dump_memory_map());
       }, false);
   }
   // 画面の高さに応じてcanvasサイズ変更

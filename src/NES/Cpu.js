@@ -80,13 +80,11 @@ class Cpu {
 
     // 0x0000 - 0x07FF: 2KB internal RAM
     // 0x0800 - 0x1FFF: Mirrors of 0x0000 - 0x07FF (repeats every 0x800 bytes)
-
     if (address >= 0 && address < 0x2000)
       return this.ram.load(address & 0x07FF);
 
     // 0x2000 - 0x2007: PPU registers
     // 0x2008 - 0x3FFF: Mirrors of 0x2000 - 0x2007 (repeats every 8 bytes)
-
     if (address >= 0x2000 && address < 0x4000)
       return this.ppu.loadRegister(address & 0x2007);
 
@@ -205,40 +203,46 @@ class Cpu {
         console.error('invalid operand')
         break;
       case CPU_INSTRUCTIONS.LDA.id:
-        this.opADC(address); 
+        this.opLDA(address); 
         break;
       case CPU_INSTRUCTIONS.LDX.id:
-        this.opADC(address); 
+        this.opLDX(address); 
         break;
       case CPU_INSTRUCTIONS.LDY.id:
-        this.opADC(address); 
+        this.opLDY(address); 
         break;
       case CPU_INSTRUCTIONS.STA.id:
-        this.opADC(address); 
+        this.opSTA(address); 
         break;
       case CPU_INSTRUCTIONS.STX.id:
-        this.opADC(address); 
+        this.opSTX(address); 
         break;
       case CPU_INSTRUCTIONS.STY.id:
-        this.opADC(address); 
+        this.opSTY(address); 
         break;
       case CPU_INSTRUCTIONS.TAX.id:
-        this.opADC(address); 
+        this.opTAX(); 
         break;
       case CPU_INSTRUCTIONS.TAY.id:
-        this.opADC(address); 
+        this.opTAY(); 
         break;
       case CPU_INSTRUCTIONS.TSX.id:
-        this.opADC(address); 
+        this.opTSX(); 
         break;
       case CPU_INSTRUCTIONS.TXA.id:
-        this.opADC(address); 
+        this.opTXA(); 
         break;
       case CPU_INSTRUCTIONS.TXS.id:
-        this.opADC(address); 
+        this.opTXS(); 
         break;
       case CPU_INSTRUCTIONS.TYA.id:
+        this.opTYA(); 
+        break;
+      case CPU_INSTRUCTIONS.ADC.id:
         this.opADC(address); 
+        break;
+      case CPU_INSTRUCTIONS.AND.id:
+        this.opAND(address); 
         break;
       case CPU_INSTRUCTIONS.ASL.id:
         if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
@@ -246,6 +250,41 @@ class Cpu {
         else
           this.opASL(address); 
         break;
+      case CPU_INSTRUCTIONS.BIT.id:
+        this.opBIT(address);
+        break;
+      case CPU_INSTRUCTIONS.CMP.id:
+        this.opCMP(address, this.a.load());
+        break;
+      case CPU_INSTRUCTIONS.CPX.id:
+        this.opCMP(address, this.x.load());
+        break;
+      case CPU_INSTRUCTIONS.CPY.id:
+        this.opCMP(address, this.y.load());
+        break;
+      case CPU_INSTRUCTIONS.DEC.id:
+        this.opDEC(address);
+        break;
+      case CPU_INSTRUCTIONS.DEX.id:
+        this.x.store(this.opDEC_Sub(this.x.load()));
+        break;
+      case CPU_INSTRUCTIONS.DEY.id:
+        this.y.store(this.opDEC_Sub(this.y.load()));
+        break;
+      case CPU_INSTRUCTIONS.EOR.id:
+        this.opEOR(address);
+        break;
+      case CPU_INSTRUCTIONS.INC.id:
+        this.opINC(address);
+        break;
+      case CPU_INSTRUCTIONS.INX.id:
+        this.x.store(this.opINC_Sub(this.x.load()));
+        break;
+      case CPU_INSTRUCTIONS.INY.id:
+        this.y.store(this.opINC_Sub(this.y.load()));
+        break;
+      //
+      // not implemented oprands
       default: 
         // temporary skip.
         console.error('Cpu.operand is not implemented yet');
@@ -512,8 +551,8 @@ class Cpu {
   opTSX() {
     let data = this.s.load();
     this.x.store(data);
-    this.s.clearN();
-    this.s.clearZ();
+    this.p.clearN();
+    this.p.clearZ();
   }
   // TXA : XレジスタをAレジスタにコピー
   opTXA() {
@@ -524,7 +563,7 @@ class Cpu {
   }
   // TXS : XレジスタをSレジスタにコピー
   opTXS() {
-    this.s.store(this.x.load());
+    this.p.store(this.x.load());
   }
   // TYA : YレジスタをAレジスタにコピー
   opTYA() {
@@ -549,7 +588,7 @@ class Cpu {
     else
       this.p.clearV();
   }
-  // AND : AレジスタとAND演算をする
+  // AND : AレジスタとAND演算をする。(結果はAへ格納)
   opAND(address) {
     let src1 = this.a.load();
     let src2 = this.load(address);
@@ -571,12 +610,62 @@ class Cpu {
     this.updateC(result);
     return result & 0xff;
   }
+  // BIT : Aとメモリをビット比較演算します。
+  opBIT(address) {
+    let data = this.load(address);
+    let result = data & this.a.load();
+    this.updateN(data);
+    this.updateZ(result);
+    if ((data & 0x40) == 0)
+      this.p.clearV();
+    else
+      this.p.setV();
+  }
+  // CMP : src(A/X/Y)とメモリを比較演算します。
+  opCMP(address, src) {
+    let data = this.load(address);
+    let result = src - data;
+    this.updateN(result);
+    this.updateZ(result);
+    if (src >= data)
+      this.p.setC();
+    else
+      this.p.clearC();
+  }
+  // DEC : メモリをデクリメントします。
+  opDEC(address) {
+    this.store(address, this.opDEC_Sub(address));
+  }
+  opDEC_Sub(data) {
+    let result = (data - 1);
+    this.updateN(result);
+    this.updateZ(result);
+    return result & 0xFF;
+  }
+  // EOR : Aとメモリを論理XOR演算します。(結果はAへ格納)
+  opEOR(address) {
+    let src1 = this.a.load();
+    let src2 = this.load(address);
+    var result = src1 ^ src2;
+    this.a.store(result);
+    this.updateN(result);
+    this.updateZ(result);
+  }
+  // INC : メモリをインクリメントします。
+  opINC(address) {
+    this.store(address, this.opINC_Sub(address));
+  }
+  opINC_Sub(data) {
+    let result = (data + 1);
+    this.updateN(result);
+    this.updateZ(result);
+    return result & 0xFF;
+  }
 
-
-
-  // dump methods
+  // End Of Operands
+  //
   /**
-   *
+   * dump methods
    */
   dump() {
     let buffer = 'cpu ';
