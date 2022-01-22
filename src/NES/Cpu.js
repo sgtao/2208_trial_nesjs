@@ -242,9 +242,9 @@ class Cpu {
         break;
       case CPU_INSTRUCTIONS.ASL.id:
         if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
-          this.a.store(this.ASL_Sub(this.a.load()));
+          this.a.store(this.opASL_Sub(this.a.load()));
         else
-          this.opADC(address); 
+          this.opASL(address); 
         break;
       default: 
         // temporary skip.
@@ -560,19 +560,16 @@ class Cpu {
   }
   // ASL : Aまたはメモリを左へシフトします。
   opASL(address) {
-
+    this.store(address, this.opASL_Sub(this.load(address)));
   }
-// 左シフト
-  ASL_Sub(data) {
+  // 左シフト
+  opASL_Sub(data) {
     this.p.store(this.p.load() & 0xFE | (data >> 7));
     let result = (data << 1)
     this.updateN(result)
     this.updateZ(result);
     this.updateC(result);
     return result & 0xff;
-  }
-  ASL(address) {
-    this.Set(address, this.ASL_Sub(this.Get(address)));
   }
 
 

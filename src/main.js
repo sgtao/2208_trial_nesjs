@@ -39,7 +39,8 @@ function nes_rom_change(arraybuffer) {
   dump.putMessage(nes.cpu.dump());
   dump.putMessage(nes.ppu.dump());
   nes.Run();
-  // dump.putMessage(nes.cpu.dump_memory_map());
+  dump.putMessage('after Run.');
+  dump.putMessage(nes.cpu.dump_memory_map());
 }
 // ローカル上のROMを読み込み
 function read_local_file(fileObj, cb) {
