@@ -202,6 +202,7 @@ class Cpu {
       case CPU_INSTRUCTIONS.INV.id: // Invalid op , temporary skip
         console.error('invalid operand')
         break;
+      // Load and Store Instructions
       case CPU_INSTRUCTIONS.LDA.id:
         this.opLDA(address); 
         break;
@@ -220,6 +221,7 @@ class Cpu {
       case CPU_INSTRUCTIONS.STY.id:
         this.opSTY(address); 
         break;
+      // Transfer Instructions
       case CPU_INSTRUCTIONS.TAX.id:
         this.opTAX(); 
         break;
@@ -238,6 +240,7 @@ class Cpu {
       case CPU_INSTRUCTIONS.TYA.id:
         this.opTYA(); 
         break;
+      // Arithmetic/Logical/etc. Instructions
       case CPU_INSTRUCTIONS.ADC.id:
         this.opADC(address); 
         break;
@@ -307,6 +310,7 @@ class Cpu {
       case CPU_INSTRUCTIONS.SBC.id:
         this.opSBC(address);
         break;
+      // Stack Instructions
       case CPU_INSTRUCTIONS.PHA.id:
         this.opPHA();
         break;
@@ -319,6 +323,7 @@ class Cpu {
       case CPU_INSTRUCTIONS.PLP.id:
         this.opPLP();
         break;
+      // Jump/Subroutine Instructions
       case CPU_INSTRUCTIONS.JMP.id:
         this.opJMP(address);
         break;
@@ -331,6 +336,7 @@ class Cpu {
       case CPU_INSTRUCTIONS.RTI.id:
         this.opRTI();
         break;
+      // Branch Instructions
       case CPU_INSTRUCTIONS.BCC.id:
         this.opBranch(address, !this.p.isC());
         break;
@@ -354,6 +360,28 @@ class Cpu {
         break;
       case CPU_INSTRUCTIONS.BVS.id:
         this.opBranch(address, this.p.isV());
+        break;
+      // Set and Clear Instructions
+      case CPU_INSTRUCTIONS.CLC.id:
+        this.p.clearC();
+        break;
+      case CPU_INSTRUCTIONS.CLD.id:
+        this.p.clearD();
+        break;
+      case CPU_INSTRUCTIONS.CLI.id:
+        this.p.clearI();
+        break;
+      case CPU_INSTRUCTIONS.CLV.id:
+        this.p.clearV();
+        break;
+      case CPU_INSTRUCTIONS.SEC.id:
+        this.p.setC();
+        break;
+      case CPU_INSTRUCTIONS.SED.id:
+        this.p.setD();
+        break;
+      case CPU_INSTRUCTIONS.SEI.id:
+        this.p.setI();
         break;
       //
       // not implemented oprands
@@ -845,7 +873,8 @@ class Cpu {
   }
   // RTS : サブルーチンから復帰します。
   opRTS() {
-    this.pc.store(this.popStack2Bytes() + 1);
+    this.pc.store(this.popStack2Bytes());
+    this.pc.increment();
   }
   // RTI : 割り込みルーチンから復帰します。
   opRTI() {
