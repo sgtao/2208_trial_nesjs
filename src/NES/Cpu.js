@@ -196,7 +196,7 @@ class Cpu {
   operate(op, opc) {
     let address = 0;
     if (op.instruction.id !== CPU_INSTRUCTIONS.INV.id) 
-      this.getAddressWithAddressingMode(op);
+      address = this.getAddressWithAddressingMode(op);
 
     switch (op.instruction.id) {
       case CPU_INSTRUCTIONS.INV.id: // Invalid op , temporary skip
@@ -318,6 +318,18 @@ class Cpu {
         break;
       case CPU_INSTRUCTIONS.PLP.id:
         this.opPLP();
+        break;
+      case CPU_INSTRUCTIONS.JMP.id:
+        this.opJMP(address);
+        break;
+      case CPU_INSTRUCTIONS.JSR.id:
+        this.opJSR(address);
+        break;
+      case CPU_INSTRUCTIONS.RTS.id:
+        this.opRTS();
+        break;
+      case CPU_INSTRUCTIONS.RTI.id:
+        this.opRTI();
         break;
       //
       // not implemented oprands
@@ -528,6 +540,18 @@ class Cpu {
   PopStack() {
     this.sp.increment();
     return this.load(this.getStackAddress());
+  }
+  pushStack2Bytes(value) {
+    this.store(this.getStackAddress(), (value >> 8) & 0xff);
+    this.sp.decrement();
+    this.store(this.getStackAddress(), value & 0xff);
+    this.sp.decrement();
+  }
+  popStack2Bytes() {
+    this.sp.increment();
+    var value = this.load(this.getStackAddress());
+    this.sp.increment();
+    return (this.load(this.getStackAddress()) << 8) | value;
   }
 
   /* 
@@ -784,6 +808,26 @@ class Cpu {
   // PLP : スタックからPにポップアップします。
   opPLP() {
     this.p.store(this.popStack());
+  }
+
+  // JMP : アドレスへジャンプします。
+  opJMP(address) {
+    this.pc.store(address);
+  }
+  // JSR : サブルーチンを呼び出します。
+  opJSR(address) {
+    this.pc.decrement();
+    this.pushStack2Bytes(this.pc.load());
+    this.pc.store(address);
+  }
+  // RTS : サブルーチンから復帰します。
+  opRTS() {
+    this.pc.store(this.popStack2Bytes() + 1);
+  }
+  // RTI : 割り込みルーチンから復帰します。
+  opRTI() {
+    this.p.store(this.popStack());
+    this.pc.store(this.popStack2Bytes());
   }
 
   // End Of Operands
