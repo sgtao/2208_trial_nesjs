@@ -307,6 +307,18 @@ class Cpu {
       case CPU_INSTRUCTIONS.SBC.id:
         this.opSBC(address);
         break;
+      case CPU_INSTRUCTIONS.PHA.id:
+        this.opPHA();
+        break;
+      case CPU_INSTRUCTIONS.PHP.id:
+        this.opPHP();
+        break;
+      case CPU_INSTRUCTIONS.PLA.id:
+        this.opPLA();
+        break;
+      case CPU_INSTRUCTIONS.PLP.id:
+        this.opPLP();
+        break;
       //
       // not implemented oprands
       default: 
@@ -731,6 +743,7 @@ class Cpu {
   opROR(address) {
     this.store(address, this.opROR_Sub(this.load(address)));
   }
+  // SBC : (A - メモリ - キャリーフラグの反転) を演算し、結果をAに返す。
   opSBC(address) {
     // this refer to takahirox-san's INSTRUCTIONS.SBC implement.
     let src1 = this.a.load();
@@ -751,6 +764,26 @@ class Cpu {
       this.p.setV();
     else
       this.p.clearV();
+  }
+
+  // PHA : Aをスタックにプッシュダウンします。
+  opPHA() {
+    this.pushStack(this.a.load());
+  }
+  // PHP : Pをスタックにプッシュダウンします。
+  opPHP() {
+    this.pushStack(this.p.load());
+  }
+  // PLA : スタックからAにポップアップします。
+  opPLA() {
+    let result = this.popStack();
+    this.a.store(result);
+    this.updateN(result);
+    this.updateZ(result);
+  }
+  // PLP : スタックからPにポップアップします。
+  opPLP() {
+    this.p.store(this.popStack());
   }
 
   // End Of Operands
