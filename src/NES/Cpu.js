@@ -304,6 +304,9 @@ class Cpu {
         else
           this.opROR(address);
         break;
+      case CPU_INSTRUCTIONS.SBC.id:
+        this.opSBC(address);
+        break;
       //
       // not implemented oprands
       default: 
@@ -727,6 +730,27 @@ class Cpu {
   }
   opROR(address) {
     this.store(address, this.opROR_Sub(this.load(address)));
+  }
+  opSBC(address) {
+    // this refer to takahirox-san's INSTRUCTIONS.SBC implement.
+    let src1 = this.a.load();
+    let src2 = this.load(address);
+    let c = this.p.isC() ? 0 : 1;
+    let result = src1 - src2 - c;
+    this.a.store(result);
+    this.updateN(result)
+    this.updateZ(result)
+    // TODO: check if this logic is right.
+    if (src1 >= src2 + c)
+      this.p.setC();
+    else
+      this.p.clearC();
+    // TODO: implement right overflow logic.
+    //       this is just a temporal logic.
+    if (((src1 ^ result) & 0x80) && ((src1 ^ src2) & 0x80))
+      this.p.setV();
+    else
+      this.p.clearV();
   }
 
   // End Of Operands
