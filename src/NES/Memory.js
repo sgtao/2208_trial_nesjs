@@ -16,7 +16,7 @@ class Memory {
    *  class methods
    */
   clear(){
-    for (var i = 0, il = this.getCapacity(); i < il; i++)
+    for (let i = 0, il = this.getCapacity(); i < il; i++)
       this.storeWithoutMapping(i, 0);
   }
   getCapacity() {
@@ -40,22 +40,48 @@ class Memory {
     this.data[address] = value;
   }
   dump () {
-    // log.logHexarray(this.data);
-    // return log.toHexarray(this.data);
     let buffer = '';
-    // let previousIsZeroLine = false;
+    let previousIsZeroLine = false;
     let offset = 0;
     let end = this.getCapacity();
+
     for (let i = offset; i < end; i++) {
-      if (i % 0x10 === 0) {
+      if (i % 0x10 == 0) {
+        if (previousIsZeroLine) {
+          let skipZero = false;
+          while (this._checkNext16BytesIsZero(i + 0x10, end)) {
+            i += 0x10;
+            skipZero = true;
+          }
+          if (skipZero)
+            buffer += '...\n';
+        }
         buffer += log.DecToHexString(i - offset, 4) + ' ';
+        previousIsZeroLine = true;
       }
+
       let value = this.load(i);
       buffer += log.DecToHexString(value, 2, true) + ' ';
-      if (i % 0x10 === 0xf)
+      if (value != 0)
+        previousIsZeroLine = false;
+
+      if (i % 0x10 == 0xf)
         buffer += '\n';
     }
     return buffer;
+  }
+  /**
+   *
+   */
+  _checkNext16BytesIsZero(offset, size) {
+    if (offset + 0x10 >= size)
+      return false;
+
+    let sum = 0;
+    for (let i = offset; i < offset + 0x10; i++) {
+      sum += this.load(i);
+    }
+    return sum == 0;
   }
 }
 // export

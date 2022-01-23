@@ -26,7 +26,7 @@ class Ppu {
     this.oamaddr = new Register8bit();        // 0x2003, called as SPR-RAM Address Register
     this.oamdata = new Register8bit();        // 0x2004, called as SPR-RAM I/O Register
     this.ppuscroll = new Register8bit();      // 0x2005, called as VRAM Address Register 1
-    this.ppuaddr = new Register16bit();        // 0x2006, called as VRAM Address Register 2
+    this.ppuaddr = new Register8bit();        // 0x2006, called as VRAM Address Register 2
     this.ppudata = new Register8bit();        // 0x2007, called as VRAM I/O Register
     this.oamdma = new Register8bit();         // 0x4014, called as Sprite DMA Register
 
@@ -72,7 +72,7 @@ class Ppu {
     this.spriteIds = [];
     this.spritePriorities = [];
 
-    for (var i = 0; i < 256; i++) {
+    for (let i = 0; i < 256; i++) {
       this.spritePixels[i] = -1;
       this.spriteIds[i] = -1;
       this.spritePriorities[i] = -1;
@@ -340,7 +340,7 @@ class Ppu {
   getNameTableAddressWithMirroring(address) {
     address = address & 0x2FFF;  // just in case
 
-    var baseAddress = 0;
+    let baseAddress = 0;
 
     switch (this.rom.getMirroringType()) {
       case 0: // MIRRORINGS.SINGLE_SCREEN:
@@ -533,23 +533,23 @@ class Ppu {
    *
    */
   fetchAttributeTable(){
-    var v = this.currentVRamAddress;
-    var address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07);
+    let v = this.currentVRamAddress;
+    let address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07);
 
-    var byte = this.load(address);
+    let byte = this.load(address);
 
-    var coarseX = v & 0x1F;
-    var coarseY = (v >> 5) & 0x1F
+    let coarseX = v & 0x1F;
+    let coarseY = (v >> 5) & 0x1F
 
-    var topbottom = (coarseY % 4) >= 2 ? 1 : 0; // bottom, top
-    var rightleft = (coarseX % 4) >= 2 ? 1 : 0; // right, left
+    let topbottom = (coarseY % 4) >= 2 ? 1 : 0; // bottom, top
+    let rightleft = (coarseX % 4) >= 2 ? 1 : 0; // right, left
 
-    var position = (topbottom << 1) | rightleft; // bottomright, bottomleft,
+    let position = (topbottom << 1) | rightleft; // bottomright, bottomleft,
     // topright, topleft
 
-    var value = (byte >> (position << 1)) & 0x3;
-    var highBit = value >> 1;
-    var lowBit = value & 1;
+    let value = (byte >> (position << 1)) & 0x3;
+    let highBit = value >> 1;
+    let lowBit = value & 1;
 
     this.attributeTableHighLatch = highBit === 1 ? 0xff : 0;
     this.attributeTableLowLatch = lowBit === 1 ? 0xff : 0;
@@ -559,8 +559,8 @@ class Ppu {
    *
    */
   fetchPatternTableLow(){
-    var fineY = (this.currentVRamAddress >> 12) & 0x7;
-    var index = this.ppuctrl.getBackgroundPatternTableNum() * 0x1000 +
+    let fineY = (this.currentVRamAddress >> 12) & 0x7;
+    let index = this.ppuctrl.getBackgroundPatternTableNum() * 0x1000 +
       this.nameTableRegister.load() * 0x10 + fineY;
 
     this.patternTableLowLatch = this.load(index);
@@ -570,8 +570,8 @@ class Ppu {
    *
    */
   fetchPatternTableHigh() {
-    var fineY = (this.currentVRamAddress >> 12) & 0x7;
-    var index = this.ppuctrl.getBackgroundPatternTableNum() * 0x1000 +
+    let fineY = (this.currentVRamAddress >> 12) & 0x7;
+    let index = this.ppuctrl.getBackgroundPatternTableNum() * 0x1000 +
       this.nameTableRegister.load() * 0x10 + fineY;
 
     this.patternTableHighLatch = this.load(index + 0x8);
@@ -652,7 +652,7 @@ class Ppu {
         v += 0x1000;
       } else {
         v &= ~0x7000;
-        var y = (v & 0x3E0) >> 5;
+        let y = (v & 0x3E0) >> 5;
 
         if (y === 29) {
           y = 0;
@@ -728,6 +728,18 @@ class Ppu {
     }
     return ppu_memory.dump();
   }
+  /**
+   *
+   */
+  dumpVRAM() {
+    let size = 0x10000; // 64KB
+    let vram_memory = new Memory(size);
+    for (let i = 0; i < 0x4000; i++) {
+      vram_memory.store(i, this.load(i));
+    }
+    return vram_memory.dump();
+  }
+
 }
 
 export { Ppu };

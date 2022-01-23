@@ -139,12 +139,13 @@ function initializeDomEvents() {
         dump.putMessage('\n\n# Dump ROM data');
         dump.putMessage(nes.rom.dump());
       }, false);
-    // Cpu register+operand をダンプ
-    document.querySelector("#dump_cpureg").addEventListener("click", 
+    // Cpu and Ppu register+operand をダンプ
+    document.querySelector("#dump_cpuppu_reg").addEventListener("click", 
       function (e) {
         e.preventDefault();
-        dump.putMessage('\n# Dump CPU Registers');
+        dump.putMessage('\n# Dump CPU/PPU Registers');
         dump.putMessage(nes.cpu.dump());
+        dump.putMessage(nes.ppu.dump());
       }, false);
     // Cpu memory をダンプ
     document.querySelector("#dump_cpumem").addEventListener("click", 
@@ -153,19 +154,19 @@ function initializeDomEvents() {
         dump.putMessage('\n# Dump CPU Memory');
         dump.putMessage(nes.cpu.dump_cpu_memory());
       }, false);
-    // Ppu register をダンプ
-    document.querySelector("#dump_ppureg").addEventListener("click", 
-      function (e) {
-        e.preventDefault();
-        dump.putMessage('\n# Dump PPU Registers');
-        dump.putMessage(nes.ppu.dump());
-      }, false);
-    // Ppu register をダンプ
+    // Ppu memory をダンプ
     document.querySelector("#dump_ppumem").addEventListener("click", 
       function (e) {
         e.preventDefault();
         dump.putMessage('\n# Dump PPU Memory');
         dump.putMessage(nes.ppu.dump_ppu_memory());
+      }, false);
+    // Ppu VRAM をダンプ
+    document.querySelector("#dump_ppuvram").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.putMessage('\n# Dump PPU VRAM');
+        dump.putMessage(nes.ppu.dumpVRAM());
       }, false);
   }
   // 画面の高さに応じてcanvasサイズ変更
