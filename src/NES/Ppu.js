@@ -78,7 +78,6 @@ class Ppu {
       this.spritePriorities[i] = -1;
     }
 
-
   }
   SetRom(rom) {
     this.rom = rom;
@@ -122,12 +121,12 @@ class Ppu {
         return 0;
 
       // ppustatus load
-      case 0x2002:
+      case 0x2002: {
         value = this.ppustatus.load();
         this.ppustatus.clearVBlank();
         this.registerFirstStore = true;
         return value;
-
+      }
       // oamaddr is write only, so return 0
       case 0x2003:
         return 0;
@@ -143,12 +142,24 @@ class Ppu {
 
       // ppudata load
       // temporary implement
-      case 0x2007:
-        value = this.vRam.load(this.ppuaddr.data);
-        this.ppuaddr.increment();
-        return value;
-    }
+      case 0x2007: {
+        if ((this.currentVRamAddress & 0x3FFF) >= 0 &&
+          (this.currentVRamAddress & 0x3FFF) < 0x3F00) {
+          value = this.vRamReadBuffer;
+          this.vRamReadBuffer = this.load(this.currentVRamAddress);
+        } else {
+          value = this.load(this.currentVRamAddress);
+          this.vRamReadBuffer = value;
+        }
 
+        this.incrementVRamAddress();
+        return value;
+      }
+      default: {
+        console.error('this register('+ address + ') is not implemented.');
+        break;
+      }
+    }
     return 0;
   }
   /**
@@ -162,9 +173,8 @@ class Ppu {
       // ppuctrl store
       case 0x2000: {
         this.ppuctrl.store(value);
-        let _baseaddr = 0x2000;
-        let _offset   = (value & 0x3) << 0x400;
-        this.name_table_baddr = _baseaddr + _offset;
+        this.temporalVRamAddress &= ~0xC00;
+        this.temporalVRamAddress |= (value & 0x3) << 10;
         break;
       }
       // ppumask store
@@ -178,44 +188,57 @@ class Ppu {
         break;
 
       // oamdata store
-      case 0x2004:
+      case 0x2004: {
         this.oamdata.store(value);
+        this.oamRam.store(this.oamaddr.load(), value);
+        this.oamaddr.increment();
         break;
+      }
 
       // ppuscroll store
-
-      case 0x2005:
+      case 0x2005: {
         this.ppuscroll.store(value);
-        if (this.ppuscroll_1st_access)
-          this.ppuscroll_horizontal = value;
-        else
-          this.ppuscroll_vertical = value;
-        this.ppuscroll_1st_access = ~this.ppuscroll_1st_access;
+        if (this.registerFirstStore === true) {
+          this.fineXScroll = value & 0x7;
+          this.temporalVRamAddress &= ~0x1F;
+          this.temporalVRamAddress |= (value >> 3) & 0x1F;
+        } else {
+          this.temporalVRamAddress &= ~0x73E0;
+          this.temporalVRamAddress |= (value & 0xF8) << 2;
+          this.temporalVRamAddress |= (value & 0x7) << 12;
+        }
+        this.registerFirstStore = !this.registerFirstStore;
         break;
+      }
 
       // ppuaddr store
       case 0x2006: {
-        let _temp_ppu_addr = 0;
-        if (this.ppuaddr_1st_access)
-          _temp_ppu_addr = (this.ppuaddr.data & 0x00FF) | ((value & 0xFF) << 8);
-        else
-          _temp_ppu_addr = (this.ppuaddr.data & 0x00FF) | (value & 0xFF);
-        this.ppuaddr.store(_temp_ppu_addr);
-        this.ppuaddr_1st_access = ~this.ppuaddr_1st_access;
+        if (this.registerFirstStore === true) {
+          this.temporalVRamAddress &= ~0x7F00;
+          this.temporalVRamAddress |= (value & 0x3F) << 8;
+        } else {
+          this.ppuaddr.store(value);
+          this.temporalVRamAddress &= ~0xFF;
+          this.temporalVRamAddress |= (value & 0xFF);
+          this.currentVRamAddress = this.temporalVRamAddress;
+        }
+        this.registerFirstStore = !this.registerFirstStore;
         break;
       }
+
       // ppudata store
-      case 0x2007:
+      case 0x2007: {
         this.ppudata.store(value);
-        this.vRam.store(this.ppuaddr.data, value);
-        this.ppuaddr.increment();
+        this.store(this.currentVRamAddress, value);
+        this.incrementVRamAddress();
         break;
+      }
 
-      // oamdma store
-
-      case 0x4014:
-        this.oamdma.store(value);
+      // other register
+      default: {
+        console.error('this register(' + address + ') is not implemented.');
         break;
+      }
     }
   }
 
@@ -494,6 +517,15 @@ class Ppu {
       }
     }
   }
+  /**
+   *
+   */
+  incrementVRamAddress() {
+    this.currentVRamAddress += this.ppuctrl.isIncrementAddressSet() ? 32 : 1;
+    this.currentVRamAddress &= 0x7FFF;
+    this.ppuaddr.store(this.currentVRamAddress & 0xFF);
+  }
+
 
   /**
    * dump methods

@@ -159,9 +159,8 @@ class Cpu {
 
     // 0x2000 - 0x2007: PPU registers
     // 0x2008 - 0x3FFF: Mirrors of 0x2000 - 0x2007 (repeats every 8 bytes)
-    // if (address >= 0x2000 && address < 0x4000)
-    //   return this.ppu.storeRegister(address & 0x2007, value);
-
+    if (address >= 0x2000 && address < 0x4000)
+      return this.ppu.storeRegister(address & 0x2007, value);
 
     // 0x4000 - 0x4017: APU, PPU and I/O registers
     // 0x4018 - 0x401F: APU and I/O functionality that is normally disabled
