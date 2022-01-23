@@ -97,11 +97,11 @@ class Ppu {
    */
   runCycle() {
     this.renderPixel();
-    // this.shiftRegisters();
-    // this.fetch();
+    this.shiftRegisters();
+    this.fetch();
     // this.evaluateSprites();
     this.updateFlags();
-    // this.countUpScrollCounters();
+    this.countUpScrollCounters();
     this.countUpCycle();
   }
 
@@ -463,6 +463,119 @@ class Ppu {
     return this.PALETTES[this.load(0x3F00 + index)];
   }
 
+  /**
+   *
+   */
+  shiftRegisters() {
+    if (this.scanLine >= 240 && this.scanLine <= 260)
+      return;
+
+    if ((this.cycle >= 1 && this.cycle <= 256) ||
+      (this.cycle >= 329 && this.cycle <= 336)) {
+      this.patternTableLowRegister.shift(0);
+      this.patternTableHighRegister.shift(0);
+      this.attributeTableLowRegister.shift(0);
+      this.attributeTableHighRegister.shift(0);
+    }
+  }
+
+  /**
+   * fetch function
+   */
+  fetch(){
+    if (this.scanLine >= 240 && this.scanLine <= 260)
+      return;
+
+    if (this.cycle === 0)
+      return;
+
+    if ((this.cycle >= 257 && this.cycle <= 320) || this.cycle >= 337)
+      return;
+
+    switch ((this.cycle - 1) % 8) {
+      case 0:
+        this.fetchNameTable();
+        break;
+
+      case 2:
+        this.fetchAttributeTable();
+        break;
+
+      case 4:
+        this.fetchPatternTableLow();
+        break;
+
+      case 6:
+        this.fetchPatternTableHigh();
+        break;
+
+      default:
+        break;
+    }
+
+    if (this.cycle % 8 === 1) {
+      this.nameTableRegister.store(this.nameTableLatch);
+      this.attributeTableLowRegister.storeLowerByte(this.attributeTableLowLatch);
+      this.attributeTableHighRegister.storeLowerByte(this.attributeTableHighLatch);
+      this.patternTableLowRegister.storeLowerByte(this.patternTableLowLatch);
+      this.patternTableHighRegister.storeLowerByte(this.patternTableHighLatch);
+    }
+  }
+
+  /**
+   * Refer to http://wiki.nesdev.com/w/index.php/PPU_scrolling
+   */
+  fetchNameTable(){
+    this.nameTableLatch = this.load(0x2000 | (this.currentVRamAddress & 0x0FFF));
+  }
+
+  /**
+   *
+   */
+  fetchAttributeTable(){
+    var v = this.currentVRamAddress;
+    var address = 0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07);
+
+    var byte = this.load(address);
+
+    var coarseX = v & 0x1F;
+    var coarseY = (v >> 5) & 0x1F
+
+    var topbottom = (coarseY % 4) >= 2 ? 1 : 0; // bottom, top
+    var rightleft = (coarseX % 4) >= 2 ? 1 : 0; // right, left
+
+    var position = (topbottom << 1) | rightleft; // bottomright, bottomleft,
+    // topright, topleft
+
+    var value = (byte >> (position << 1)) & 0x3;
+    var highBit = value >> 1;
+    var lowBit = value & 1;
+
+    this.attributeTableHighLatch = highBit === 1 ? 0xff : 0;
+    this.attributeTableLowLatch = lowBit === 1 ? 0xff : 0;
+  }
+
+  /**
+   *
+   */
+  fetchPatternTableLow(){
+    var fineY = (this.currentVRamAddress >> 12) & 0x7;
+    var index = this.ppuctrl.getBackgroundPatternTableNum() * 0x1000 +
+      this.nameTableRegister.load() * 0x10 + fineY;
+
+    this.patternTableLowLatch = this.load(index);
+  }
+
+  /**
+   *
+   */
+  fetchPatternTableHigh() {
+    var fineY = (this.currentVRamAddress >> 12) & 0x7;
+    var index = this.ppuctrl.getBackgroundPatternTableNum() * 0x1000 +
+      this.nameTableRegister.load() * 0x10 + fineY;
+
+    this.patternTableHighLatch = this.load(index + 0x8);
+  }
 
   /**
    *
@@ -496,6 +609,69 @@ class Ppu {
         this.ppumask.isBackgroundVisible() === true &&
         this.ppumask.isSpritesVisible() === true)
         this.rom.mapper.driveIrqCounter(this.cpu);
+    }
+  }
+
+  /**
+   *
+   */
+  countUpScrollCounters() {
+    if (this.ppumask.isBackgroundVisible() === false && this.ppumask.isSpritesVisible() === false)
+      return;
+
+    if (this.scanLine >= 240 && this.scanLine <= 260)
+      return;
+
+    if (this.scanLine === 261) {
+      if (this.cycle >= 280 && this.cycle <= 304) {
+        this.currentVRamAddress &= ~0x7BE0;
+        this.currentVRamAddress |= (this.temporalVRamAddress & 0x7BE0)
+      }
+    }
+
+    if (this.cycle === 0 || (this.cycle >= 258 && this.cycle <= 320))
+      return;
+
+    if ((this.cycle % 8) === 0) {
+      let v = this.currentVRamAddress;
+
+      if ((v & 0x1F) === 31) {
+        v &= ~0x1F;
+        v ^= 0x400;
+      } else {
+        v++;
+      }
+
+      this.currentVRamAddress = v;
+    }
+
+    if (this.cycle === 256) {
+      let v = this.currentVRamAddress;
+
+      if ((v & 0x7000) !== 0x7000) {
+        v += 0x1000;
+      } else {
+        v &= ~0x7000;
+        var y = (v & 0x3E0) >> 5;
+
+        if (y === 29) {
+          y = 0;
+          v ^= 0x800;
+        } else if (y === 31) {
+          y = 0;
+        } else {
+          y++;
+        }
+
+        v = (v & ~0x3E0) | (y << 5);
+      }
+
+      this.currentVRamAddress = v;
+    }
+
+    if (this.cycle === 257) {
+      this.currentVRamAddress &= ~0x41F;
+      this.currentVRamAddress |= (this.temporalVRamAddress & 0x41F)
     }
   }
 

@@ -177,6 +177,7 @@ class Register16bit extends Register {
   constructor() {
     super(2);
     this.isRegister16bit = true;
+    this.bytes = new Uint8Array(this.data.buffer);
   }
   /**
    *
