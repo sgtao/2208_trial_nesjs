@@ -150,7 +150,6 @@ class Cpu {
 
   store(addr, value) {
     let address = addr & 0xFFFF;
-
     // 0x0000 - 0x07FF: 2KB internal RAM
     // 0x0800 - 0x1FFF: Mirrors of 0x0000 - 0x07FF (repeats every 0x800 bytes)
 
@@ -509,7 +508,7 @@ class Cpu {
   getAddressAbsolute() {
     let addr = this.load2Bytes(this.pc.load());
     this.pc.incrementBy2()
-    return addr;
+    return (addr & 0xFFFF);
   }
 
   // Indexed Zero Page Addressing X
@@ -535,8 +534,9 @@ class Cpu {
   // そしてその次のアドレスに格納されている値を実効アドレスの上位バイトとします。
   // このインクリメントにおいてキャリーは無視します。
   getAddressIndirectX() {
-    let addr = (this.getAddressZeroPage() + this.x.load()) & 0xFF;
-    return this.ram.load2Byte(addr);
+    let index = this.getAddressZeroPage();
+    index += this.x.load();
+    return this.load2Bytes(index & 0xFF);
   }
 
   // Indirect Indexed Addressing
@@ -546,9 +546,10 @@ class Cpu {
   // このときのインクリメントにおけるキャリーは無視します。
   // 得られたアドレスにインデックスレジスタYを加算したものを実効アドレスとします。
   getAddressIndirectY() {
-    let addr = this.getAddressZeroPage();
-    addr += this.y.load();
-    return ( addr & 0xFFFF );
+    let index = this.getAddressZeroPage();
+    let address = this.load2Bytes(index);
+    address += this.y.load();
+    return (address & 0xFFFF);
   }
 
   // Indexed Absolute Addressing X
@@ -557,7 +558,7 @@ class Cpu {
   getAddressAbsoluteX() {
     let addr = this.getAddressAbsolute();
     addr += this.x.load();
-    return addr;
+    return (addr & 0xFFFF);
   }
 
   // Indexed Absolute Addressing Y
@@ -565,8 +566,8 @@ class Cpu {
   // このアドレスにインデックスレジスタYを加算したものを実効アドレスとします。
   getAddressAbsoluteY() {
     let addr = this.getAddressAbsolute();
-    addr += this.x.load();
-    return addr;
+    addr += this.y.load();
+    return (addr & 0xFFFF);
   }
 
   // Relative Addressing
@@ -574,6 +575,8 @@ class Cpu {
   getAddressRelative() {
     let addr = this.load(this.pc.load());
     this.pc.increment();
+    if (addr & 0x80)
+      addr -= 0x100;
     return addr;
   }
 
@@ -712,19 +715,20 @@ class Cpu {
 
   // ADC : (A + メモリ + キャリーフラグ) を演算して結果をAへ格納
   opADC(address) {
-    let oldA = this.a.load();
-    let data = this.load(address);
-    let carry = this.p.isC() ? 1 : 0;
-    let result = data + carry;
+    let src1 = this.a.load();
+    let src2 = this.load(address);
+    let c = this.p.isC() ? 1 : 0;
+    let result = (src1 + src2 + c);
+    // console.log('adc result ' , address, src1, src2, c,  'is  ' + result);
     this.a.store(result);
-    this.updateN(data);
-    this.updateZ(data);
-    this.updateC(result);
-    if (!((oldA ^ data) & 0x80) && ((data ^ result) & 0x80))
+    this.updateN(result)
+    this.updateZ(result)
+    this.updateC(result)
+    if (!((src1 ^ src2) & 0x80) && ((src2 ^ result) & 0x80))
       this.p.setV();
     else
       this.p.clearV();
-  }
+}
   // AND : AレジスタとAND演算をする。(結果はAへ格納)
   opAND(address) {
     let result = this.a.load() & this.load(address);
@@ -768,7 +772,7 @@ class Cpu {
   }
   // DEC : メモリをデクリメントします。
   opDEC(address) {
-    this.store(address, this.opDEC_Sub(address));
+    this.store(address, this.opDEC_Sub(this.load(address)));
   }
   opDEC_Sub(data) {
     let result = (data - 1);
@@ -785,7 +789,7 @@ class Cpu {
   }
   // INC : メモリをインクリメントします。
   opINC(address) {
-    this.store(address, this.opINC_Sub(address));
+    this.store(address, this.opINC_Sub(this.load(address)));
   }
   opINC_Sub(data) {
     let result = (data + 1);
@@ -955,8 +959,11 @@ class Cpu {
     return buffer;
   }
   dump_cpu_memory() {
-    let cpu_memory = new Memory(0x10000); // 64KB
-    for (let i = 0; i < 0x10000; i++) {
+    // let dump_size = 0x10000; // 64KB
+    // let dump_size = 0x800; // 2KB
+    let dump_size = 0x200; // 512B
+    let cpu_memory = new Memory(dump_size); // 64KB
+    for (let i = 0; i < dump_size; i++) {
       cpu_memory.store(i,this.load(i));
     }
     return cpu_memory.dump();

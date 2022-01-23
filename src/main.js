@@ -99,6 +99,14 @@ function initializeDomEvents() {
         dump.putMessage(nes.ppu.dump());
         nes.Run();
       }, false);
+    // STEP実行（+1cycle)
+    document.querySelector("#nes_step").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.putMessage('#Step +1cycles');
+        nes.cycle_limit += 1;
+        nes.Run();
+      }, false);
     // STEP実行（+16cycle)
     document.querySelector("#nes_step16").addEventListener("click", 
       function (e) {
