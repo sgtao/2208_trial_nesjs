@@ -1,4 +1,4 @@
-// PpuRegisterPallet.js
+// epuRegisterPalette.js';
 import { Register8bit } from './Register.js';
 
 // Pallet Table

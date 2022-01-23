@@ -1,6 +1,6 @@
 // Ppu.js
 import { Register8bit, Register16bit } from './Register.js';
-import { PALETTES, PpuControlRegister, PpuMaskRegister, PpuStatusRegister } from './PpuRegisterPallet.js';
+import { PALETTES, PpuControlRegister, PpuMaskRegister, PpuStatusRegister } from './PpuRegisterPalette.js';
 import { Memory } from './Memory.js';
 class Ppu {
   constructor(nes) {
@@ -13,7 +13,7 @@ class Ppu {
     this.frame = 0;
     this.scanLine = 0;
     this.cycle = 0;
-
+    this.PALETTES = PALETTES;
     // inside memory
     this.vRam = new Memory(16 * 1024);  // 16KB
     this.oamRam = new Memory(256);      // 256B, primary OAM memory
@@ -97,13 +97,13 @@ class Ppu {
    *
    */
   runCycle() {
-    // this.renderPixel();
+    this.renderPixel();
     // this.shiftRegisters();
     // this.fetch();
     // this.evaluateSprites();
     // this.updateFlags();
     // this.countUpScrollCounters();
-    // this.countUpCycle();
+    this.countUpCycle();
   }
 
 
@@ -363,7 +363,101 @@ class Ppu {
 
     return baseAddress | (address & 0x3FF);
   }
+  /**
+   * render display
+   */
+  renderPixel() {
+    // Note: this comparison order is for performance.
+    if (this.cycle >= 257 || this.scanLine >= 240 || this.cycle === 0)
+      return;
 
+    let x = this.cycle - 1;
+    let y = this.scanLine;
+
+    let backgroundVisible = this.ppumask.isBackgroundVisible();
+    let spritesVisible = this.ppumask.isSpritesVisible();
+
+    let backgroundPixel = this.getBackgroundPixel();
+    let spritePixel = this.spritePixels[x];
+    let spriteId = this.spriteIds[x];
+    let spritePriority = this.spritePriorities[x];
+
+    let c = this.PALETTES[this.load(0x3F00)];
+
+    // TODO: fix me
+
+    if (backgroundVisible === true && spritesVisible === true) {
+      if (spritePixel === -1) {
+        c = backgroundPixel;
+      } else {
+        if (backgroundPixel === c)
+          c = spritePixel
+        else
+          c = spritePriority === 0 ? spritePixel : backgroundPixel;
+      }
+    } else if (backgroundVisible === true && spritesVisible === false) {
+      c = backgroundPixel;
+    } else if (backgroundVisible === false && spritesVisible === true) {
+      if (spritePixel !== -1)
+        c = spritePixel;
+    }
+
+    // TODO: fix me
+
+    if (this.ppumask.emphasisRed() === true)
+      c = c | 0x00FF0000;
+    if (this.ppumask.emphasisGreen() === true)
+      c = c | 0x0000FF00;
+    if (this.ppumask.emphasisBlue() === true)
+      c = c | 0x000000FF;
+
+    // TODO: fix me
+
+    if (backgroundVisible === true && spritesVisible === true &&
+      spriteId === 0 && spritePixel !== 0 && backgroundPixel !== 0)
+      this.ppustatus.setZeroHit();
+
+    this.display.renderPixel(x, y, c);
+  }
+
+  /**
+   *
+   */
+  getBackgroundPixel() {
+    let offset = 15 - this.fineXScroll;
+
+    let lsb = (this.patternTableHighRegister.loadBit(offset) << 1) |
+      this.patternTableLowRegister.loadBit(offset);
+    let msb = (this.attributeTableHighRegister.loadBit(offset) << 1) |
+      this.attributeTableLowRegister.loadBit(offset);
+    let index = (msb << 2) | lsb;
+
+    // TODO: fix me
+
+    if (this.ppumask.isGreyscale() === true)
+      index = index & 0x30;
+
+    return this.PALETTES[this.load(0x3F00 + index)];
+  }
+
+  /**
+   * countUp cycle and scanLine
+   * cycle:    0 - 340
+   * scanLine: 0 - 261
+   */
+  countUpCycle() {
+    this.cycle++;
+
+    if (this.cycle > 340) {
+      this.cycle = 0;
+      this.scanLine++;
+
+      if (this.scanLine > 261) {
+        this.scanLine = 0;
+        this.frame++;
+      }
+    }
+  }
 
   /**
    * dump methods
@@ -382,6 +476,13 @@ class Ppu {
     buffer += 'OAM DMA: ' + this.oamdma.dump() + '\n';
     buffer += '\n';
     return buffer;
+  }
+  dump_ppu_memory() {
+    let ppu_memory = new Memory(0x4000); // 16KB
+    for (let i = 0; i < 0x4000; i++) {
+      ppu_memory.store(i, this.load(i));
+    }
+    return ppu_memory.dump();
   }
 }
 

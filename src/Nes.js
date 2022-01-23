@@ -49,9 +49,9 @@ class Nes {
    */
   runCycle() {
     this.cpu.runCycle();
-    // this.ppu.runCycle();
-    // this.ppu.runCycle();
-    // this.ppu.runCycle();
+    this.ppu.runCycle();
+    this.ppu.runCycle();
+    this.ppu.runCycle();
   }
 }
 export { Nes };

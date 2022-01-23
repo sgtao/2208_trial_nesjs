@@ -954,7 +954,7 @@ class Cpu {
     buffer += ' ';
     return buffer;
   }
-  dump_memory_map() {
+  dump_cpu_memory() {
     let cpu_memory = new Memory(0x10000); // 64KB
     for (let i = 0; i < 0x10000; i++) {
       cpu_memory.store(i,this.load(i));
