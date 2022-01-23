@@ -101,7 +101,7 @@ class Ppu {
     // this.shiftRegisters();
     // this.fetch();
     // this.evaluateSprites();
-    // this.updateFlags();
+    this.updateFlags();
     // this.countUpScrollCounters();
     this.countUpCycle();
   }
@@ -438,6 +438,42 @@ class Ppu {
       index = index & 0x30;
 
     return this.PALETTES[this.load(0x3F00 + index)];
+  }
+
+
+  /**
+   *
+   */
+  updateFlags() {
+    if (this.cycle === 1) {
+      if (this.scanLine === 241) {
+        this.ppustatus.setVBlank();
+        this.display.updateScreen();
+
+        //if(this.ppuctrl.enabledNmi() === true)
+        //  this.cpu.interrupt(this.cpu.INTERRUPTS.NMI);
+      } else if (this.scanLine === 261) {
+        this.ppustatus.clearVBlank();
+        this.ppustatus.clearZeroHit();
+        this.ppustatus.clearOverflow();
+      }
+    }
+
+    if (this.cycle === 10) {
+      if (this.scanLine === 241) {
+        if (this.ppuctrl.enabledNmi() === true)
+          this.cpu.interrupt(this.cpu.INTERRUPTS.NMI);
+      }
+    }
+
+    // @TODO: check this driving IRQ counter for MMC3Mapper timing is correct
+
+    if (this.rom.mapper.isMMC3Mapper === true) {
+      if (this.cycle === 340 && this.scanLine <= 240 &&
+        this.ppumask.isBackgroundVisible() === true &&
+        this.ppumask.isSpritesVisible() === true)
+        this.rom.mapper.driveIrqCounter(this.cpu);
+    }
   }
 
   /**

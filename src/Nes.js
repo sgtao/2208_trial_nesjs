@@ -33,7 +33,8 @@ class Nes {
     this.cycle_limit = 16;
   }
   Run () {
-    // let cycles = (341 * 262 / 3) | 0; // TODO: temporal
+    let one_frame_cycle = (341 * 262 / 3) | 0; // TODO: temporal
+    // this.cycle_limit = one_frame_cycle;
     while (this.cycle < this.cycle_limit) {
       this.runCycle();
       this.cycle++;
