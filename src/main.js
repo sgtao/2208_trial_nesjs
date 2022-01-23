@@ -129,6 +129,13 @@ function initializeDomEvents() {
         dump.putMessage('\n\n# Dump CPU Memory');
         dump.putMessage(nes.cpu.dump_memory_map());
       }, false);
+    // Ppu register をダンプ
+    document.querySelector("#dump_ppureg").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.putMessage('\n\n# Dump PPU Registers');
+        dump.putMessage(nes.ppu.dump());
+      }, false);
   }
   // 画面の高さに応じてcanvasサイズ変更
   window.addEventListener('resize', () => {
