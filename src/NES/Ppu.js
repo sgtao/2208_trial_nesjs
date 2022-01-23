@@ -1,6 +1,6 @@
 // Ppu.js
 import { Register8bit, Register16bit } from './Register.js';
-import { PpuControlRegister, PpuMaskRegister, PpuStatusRegister } from './PpuRegisterPallet.js';
+import { PALETTES, PpuControlRegister, PpuMaskRegister, PpuStatusRegister } from './PpuRegisterPallet.js';
 import { Memory } from './Memory.js';
 class Ppu {
   constructor(nes) {
@@ -9,6 +9,10 @@ class Ppu {
     this.rom = null;
     this.cpu = null;
     this.display = null;  // set by .setDisplay();
+
+    this.frame = 0;
+    this.scanLine = 0;
+    this.cycle = 0;
 
     // inside memory
     this.vRam = new Memory(16 * 1024);  // 16KB
@@ -32,6 +36,49 @@ class Ppu {
     this.ppuscroll_vertical   = 0;
     this.ppuscroll_1st_access = true;
     this.ppuaddr_1st_access = true;
+    // inside shift registers
+
+    this.nameTableRegister = new Register8bit();
+    this.attributeTableLowRegister = new Register16bit();
+    this.attributeTableHighRegister = new Register16bit();
+    this.patternTableLowRegister = new Register16bit();
+    this.patternTableHighRegister = new Register16bit();
+
+    // inside latches
+
+    this.nameTableLatch = 0;
+    this.attributeTableLowLatch = 0;
+    this.attributeTableHighLatch = 0;
+    this.patternTableLowLatch = 0;
+    this.patternTableHighLatch = 0
+
+    //
+    this.fineXScroll = 0;
+    this.currentVRamAddress = 0;
+    this.temporalVRamAddress = 0;
+
+    //
+
+    this.vRamReadBuffer = 0;
+    this.registerFirstStore = true;
+
+    // sprites
+    // this.spritesManager = new SpritesManager(this.oamRam);
+    // this.spritesManager2 = new SpritesManager(this.oamRam2);
+
+    // for one scan line
+
+    this.spritePixels = [];
+    this.spriteIds = [];
+    this.spritePriorities = [];
+
+    for (var i = 0; i < 256; i++) {
+      this.spritePixels[i] = -1;
+      this.spriteIds[i] = -1;
+      this.spritePriorities[i] = -1;
+    }
+
+
   }
   SetRom(rom) {
     this.rom = rom;
@@ -46,6 +93,19 @@ class Ppu {
     // console.dir(this.ppustatus);
     this.ppustatus.store(0x80);
   }
+  /**
+   *
+   */
+  runCycle() {
+    // this.renderPixel();
+    // this.shiftRegisters();
+    // this.fetch();
+    // this.evaluateSprites();
+    // this.updateFlags();
+    // this.countUpScrollCounters();
+    // this.countUpCycle();
+  }
+
 
   // load/store register from Cpu
   /**
@@ -64,8 +124,8 @@ class Ppu {
       // ppustatus load
       case 0x2002:
         value = this.ppustatus.load();
-        // this.ppustatus.clearVBlank();
-        // this.registerFirstStore = true;
+        this.ppustatus.clearVBlank();
+        this.registerFirstStore = true;
         return value;
 
       // oamaddr is write only, so return 0
@@ -159,10 +219,156 @@ class Ppu {
     }
   }
 
-  // dump methods
   /**
-   *
+   * load/store inside Ppu
    */
+  // load from Ppu memory map
+  load(address) {
+    address = address & 0x3FFF;  // just in case
+
+    // 0x0000 - 0x1FFF is mapped with cartridge's CHR-ROM if it exists
+
+    if (address < 0x2000 && this.rom.hasChrRom() === true)
+      return this.rom.load(address);
+
+    // 0x0000 - 0x0FFF: pattern table 0
+    // 0x1000 - 0x1FFF: pattern table 1
+    // 0x2000 - 0x23FF: nametable 0
+    // 0x2400 - 0x27FF: nametable 1
+    // 0x2800 - 0x2BFF: nametable 2
+    // 0x2C00 - 0x2FFF: nametable 3
+    // 0x3000 - 0x3EFF: Mirrors of 0x2000 - 0x2EFF
+    // 0x3F00 - 0x3F1F: Palette RAM indices
+    // 0x3F20 - 0x3FFF: Mirrors of 0x3F00 - 0x3F1F
+
+    if (address >= 0x2000 && address < 0x3F00)
+      return this.vRam.load(this.getNameTableAddressWithMirroring(address & 0x2FFF));
+
+    if (address >= 0x3F00 && address < 0x4000)
+      address = address & 0x3F1F;
+
+    // Addresses for palette
+    // 0x3F10/0x3F14/0x3F18/0x3F1C are mirrors of
+    // 0x3F00/0x3F04/0x3F08/0x3F0C.
+
+    if (address === 0x3F10)
+      address = 0x3F00;
+
+    if (address === 0x3F14)
+      address = 0x3F04;
+
+    if (address === 0x3F18)
+      address = 0x3F08;
+
+    if (address === 0x3F1C)
+      address = 0x3F0C;
+
+    return this.vRam.load(address);
+  }
+  //
+  // store to Ppu memory map
+  store(address, value) {
+    address = address & 0x3FFF;  // just in case
+
+    // 0x0000 - 0x1FFF is mapped with cartridge's CHR-ROM if it exists
+
+    if (address < 0x2000 && this.rom.hasChrRom() === true) {
+      this.rom.store(address, value);
+      return;
+    }
+
+    // 0x0000 - 0x0FFF: pattern table 0
+    // 0x1000 - 0x1FFF: pattern table 1
+    // 0x2000 - 0x23FF: nametable 0
+    // 0x2400 - 0x27FF: nametable 1
+    // 0x2800 - 0x2BFF: nametable 2
+    // 0x2C00 - 0x2FFF: nametable 3
+    // 0x3000 - 0x3EFF: Mirrors of 0x2000 - 0x2EFF
+    // 0x3F00 - 0x3F1F: Palette RAM indices
+    // 0x3F20 - 0x3FFF: Mirrors of 0x3F00 - 0x3F1F
+
+    if (address >= 0x2000 && address < 0x3F00) {
+      this.vRam.store(this.getNameTableAddressWithMirroring(address & 0x2FFF), value);
+      return;
+    }
+
+    if (address >= 0x3F00 && address < 0x4000)
+      address = address & 0x3F1F;
+
+    // Addresses for palette
+    // 0x3F10/0x3F14/0x3F18/0x3F1C are mirrors of
+    // 0x3F00/0x3F04/0x3F08/0x3F0C.
+
+    if (address === 0x3F10)
+      address = 0x3F00;
+
+    if (address === 0x3F14)
+      address = 0x3F04;
+
+    if (address === 0x3F18)
+      address = 0x3F08;
+
+    if (address === 0x3F1C)
+      address = 0x3F0C;
+
+    return this.vRam.store(address, value);
+  }
+  // private methods for load and store
+  getNameTableAddressWithMirroring(address) {
+    address = address & 0x2FFF;  // just in case
+
+    var baseAddress = 0;
+
+    switch (this.rom.getMirroringType()) {
+      case 0: // MIRRORINGS.SINGLE_SCREEN:
+        baseAddress = 0x2000;
+        break;
+
+      case 1: // MIRRORINGS.HORIZONTAL:
+        if (address >= 0x2000 && address < 0x2400)
+          baseAddress = 0x2000;
+        else if (address >= 0x2400 && address < 0x2800)
+          baseAddress = 0x2000;
+        else if (address >= 0x2800 && address < 0x2C00)
+          baseAddress = 0x2400;
+        else
+          baseAddress = 0x2400;
+
+        break;
+
+      case 2: // MIRRORINGS.VERTICAL:
+        if (address >= 0x2000 && address < 0x2400)
+          baseAddress = 0x2000;
+        else if (address >= 0x2400 && address < 0x2800)
+          baseAddress = 0x2400;
+        else if (address >= 0x2800 && address < 0x2C00)
+          baseAddress = 0x2000;
+        else
+          baseAddress = 0x2400;
+
+        break;
+
+      case 3: // MIRRORINGS.FOUR_SCREEN:
+        if (address >= 0x2000 && address < 0x2400)
+          baseAddress = 0x2000;
+        else if (address >= 0x2400 && address < 0x2800)
+          baseAddress = 0x2400;
+        else if (address >= 0x2800 && address < 0x2C00)
+          baseAddress = 0x2800;
+        else
+          baseAddress = 0x2C00;
+
+        break;
+    }
+
+    return baseAddress | (address & 0x3FF);
+  }
+
+
+  /**
+   * dump methods
+   */
+  // dump Ppu registers
   dump() {
     let buffer = '';
     buffer += 'PPU Ctrl: ' + this.ppuctrl.dump() + '\n';

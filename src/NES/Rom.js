@@ -96,6 +96,12 @@ class Rom {
   store(address, value) {
     this.mapper.store(address & 0xFF, value);
   }
+  hasChrRom() {
+    return (this.header_parse.chr_bank_num > 0);
+  }
+  getMirroringType() {
+    return (this.header_parse.screen_type);
+  }
   dump() {
     return this.data.dump();
   }
