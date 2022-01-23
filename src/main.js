@@ -88,7 +88,7 @@ function initializeDomEvents() {
         var url = document.getElementById("romlist").value;
         read_url(url, nes_rom_change);
       }, false);
-    // Debug Console をクリア
+    // NES リセット
     document.querySelector("#nes_reset").addEventListener("click", 
       function (e) {
         e.preventDefault();
@@ -97,6 +97,14 @@ function initializeDomEvents() {
         nes.Init();
         dump.putMessage(nes.cpu.dump());
         dump.putMessage(nes.ppu.dump());
+        nes.Run();
+      }, false);
+    // STEP実行（+16cycle)
+    document.querySelector("#nes_step16").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.putMessage('\n#Step +16cycles');
+        nes.cycle_limit += 16;
         nes.Run();
       }, false);
     // 

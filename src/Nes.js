@@ -14,6 +14,8 @@ class Nes {
     this.cpu.SetPpu(this.ppu);
     this.ppu.SetCpu(this.cpu);
     this.ppu.SetDisplay(this.display);
+    this.cycle = 0;
+    this.cycle_limit = 16;
   }
   SetRom(arrayBuffer) {
     if (!this.rom.SetRom(arrayBuffer)){ // if failure
@@ -27,12 +29,17 @@ class Nes {
   Init () {
     this.cpu.InitCpu();
     this.ppu.InitPpu();
+    this.cycle = 0;
+    this.cycle_limit = 16;
   }
   Run () {
     // let cycles = (341 * 262 / 3) | 0; // TODO: temporal
-    let cycles = 16 ; // TODO: temporal
-    for (var i = 0; i < cycles; i++) {
+    while (this.cycle < this.cycle_limit) {
       this.runCycle();
+      this.cycle++;
+    }
+    if (this.cycle == this.cycle_limit) {
+      console.log('NES reach to limit. cycle : ' + this.cycle);
     }
     // if (this.state === this.STATES.RUN)
     //   requestAnimationFrame(this.runFunc);
