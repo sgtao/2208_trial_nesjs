@@ -33,14 +33,17 @@ class Nes {
     this.cycle_limit = 16;
   }
   Run () {
-    let one_frame_cycle = (341 * 262 / 3) | 0; // TODO: temporal
+    let one_frame_cycle = Math.floor(341 * 262 / 3) | 0; // TODO: temporal
     // this.cycle_limit = one_frame_cycle;
     while (this.cycle < this.cycle_limit) {
       this.runCycle();
       this.cycle++;
+      if (this.cycle % one_frame_cycle === 0)
+        console.log('update display. at cycle = ' + this.cycle);
     }
-    if (this.cycle == this.cycle_limit) {
+    if (this.cycle === this.cycle_limit) {
       console.log('NES reach to limit. cycle : ' + this.cycle);
+      this.cpu.dbg_message = true;
     }
     // if (this.state === this.STATES.RUN)
     //   requestAnimationFrame(this.runFunc);

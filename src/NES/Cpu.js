@@ -16,9 +16,10 @@ class Cpu {
     this.x = new Register8bit();
     this.y = new Register8bit();
     this.p = new CpuStatusRegister();
-    // console.dir(this.p);
     // RAM inside CPU
     this.ram = new Memory(2 * 1024);  // 2KB
+    // Debug flag
+    this.dbg_message = true;
   }
   SetRom(rom) {
     this.rom = rom;
@@ -47,9 +48,9 @@ class Cpu {
       // console.dir(op);
       this.operate(op, opc);
       this.stallCycle = op.cycle;
-      console.log(this.dump());
+      if (this.dbg_message)
+        console.log(this.dump());
     }
-
     this.stallCycle--;
   }
   isStall() {

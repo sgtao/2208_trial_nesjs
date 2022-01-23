@@ -115,6 +115,15 @@ function initializeDomEvents() {
         nes.cycle_limit += 16;
         nes.Run();
       }, false);
+    // STEP実行（+16 * 1024cycle)
+    document.querySelector("#nes_step16K").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.putMessage('\n#Step +16 * 1024cycles');
+        nes.cycle_limit += 16 * 1024;
+        nes.cpu.dbg_message = false; // restrict Cpu to show op-code at each cycle.
+        nes.Run();
+      }, false);
     // 
     // Debug Console をクリア
     document.querySelector("#clear_console").addEventListener("click", 
