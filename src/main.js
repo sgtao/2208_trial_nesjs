@@ -89,11 +89,30 @@ function initializeDomEvents() {
         read_url(url, nes_rom_change);
       }, false);
     // Debug Console をクリア
+    document.querySelector("#nes_reset").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.clrMessage();
+        dump.putMessage('NES Reset...\n');
+        nes.Init();
+        dump.putMessage(nes.cpu.dump());
+        dump.putMessage(nes.ppu.dump());
+        nes.Run();
+      }, false);
+    // 
+    // Debug Console をクリア
     document.querySelector("#clear_console").addEventListener("click", 
       function (e) {
         e.preventDefault();
         dump.clrMessage();
         dump.putMessage('clear message...\n');
+      }, false);
+    // ROMをダンプ
+    document.querySelector("#dump_rom").addEventListener("click", 
+      function (e) {
+        e.preventDefault();
+        dump.putMessage('\n\n# Dump ROM data');
+        dump.putMessage(nes.rom.dump());
       }, false);
     // Cpu memory をダンプ
     document.querySelector("#dump_cpumem").addEventListener("click", 

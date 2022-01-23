@@ -24,9 +24,7 @@
         </div>
         <div class="gamectrl">
             <span>本体操作</span>
-            <button>START</button>
-            <button>STOP</button>
-            <button>RESET</button>
+            <button id="nes_reset">RESET</button>
         </div>
         <div class="gamepad">
             <table>
@@ -78,6 +76,7 @@
             <div class="dbg_label">
                 <span>debug console: </span>
                 <button id="clear_console">clr.</button>
+                <button id="dump_rom">dump ROM</button>
                 <button id="dump_cpumem">cpu mem.</button>
             </div>
             <textarea  id="DBGconsole" class="textArea" value="1" cols="80" rows="10" maxlength="15">コンソール</textarea>

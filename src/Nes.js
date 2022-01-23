@@ -30,7 +30,7 @@ class Nes {
   }
   Run () {
     // let cycles = (341 * 262 / 3) | 0; // TODO: temporal
-    let cycles = 256 ; // TODO: temporal
+    let cycles = 16 ; // TODO: temporal
     for (var i = 0; i < cycles; i++) {
       this.runCycle();
     }

@@ -42,7 +42,7 @@ class Ppu {
     this.display = display;
   }
   InitPpu() {
-    console.dir(this.ppustatus);
+    // console.dir(this.ppustatus);
     this.ppustatus.store(0x80);
   }
 
