@@ -339,13 +339,18 @@ html, body {
   font-family: "Kameron", "Noto Sans JP", sans-serif;
 }
 
-h1 {
+header h1 {
   font-size: 2em;
   color: blue;
   transition: all 0.3s;
 }
-h1:hover {
+header h1:hover {
   transform: translateX(50px);
+  color: red;
+}
+header .instruction {
+  font-size: larger;
+  font-weight: bold;
   color: red;
 }
 

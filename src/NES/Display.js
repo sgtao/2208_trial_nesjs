@@ -53,10 +53,13 @@ class Display  {
   }
   updateScreen() {
     for (let i = 0; i < this.canvas.width * this.canvas.height * 4; i += 4) {
-      this.ImageData.data[i] = (this.uint32[i / 4] & 0xFF000000 ) >> 24;
-      this.ImageData.data[i + 1] = (this.uint32[i / 4] & 0x00FF0000) >> 16;
-      this.ImageData.data[i + 2] = (this.uint32[i / 4] & 0x0000FF00) >> 8;
-      this.ImageData.data[i + 3] = (this.uint32[i / 4] & 0x000000FF);
+      // this.ImageData.data[i] = (this.uint32[i / 4] & 0xFF000000 ) >> 24;
+      // this.ImageData.data[i + 1] = (this.uint32[i / 4] & 0x00FF0000) >> 16;
+      // this.ImageData.data[i + 2] = (this.uint32[i / 4] & 0x0000FF00) >> 8;
+      this.ImageData.data[i] = (this.uint32[i / 4] & 0x00FF0000 ) >> 16;
+      this.ImageData.data[i + 1] = (this.uint32[i / 4] & 0x0000FF00) >> 8;
+      this.ImageData.data[i + 2] = (this.uint32[i / 4] & 0x000000FF);
+      this.ImageData.data[i + 3] = 0xFF;;
     }    
     this.ctx.putImageData(this.ImageData, 0, 0);
     return;

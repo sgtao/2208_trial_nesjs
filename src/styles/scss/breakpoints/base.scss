@@ -1,15 +1,22 @@
 html, body {
   font-family: "Kameron", "Noto Sans JP", sans-serif;
 }
-h1 {
-  font-size: 2em;
-  color: blue;
-  transition: all .3s;
-
-  &:hover {
-    transform: translateX(50px);
-    color: red;
+header {
+  h1 {
+    font-size: 2em;
+    color: blue;
+    transition: all .3s;
+  
+    &:hover {
+      transform: translateX(50px);
+      color: red;
+    }
   }
+  .instruction {
+    font-size: larger;
+    font-weight: bold;
+    color: red;
+  }  
 }
 #NESdisplay {
   display: block;
