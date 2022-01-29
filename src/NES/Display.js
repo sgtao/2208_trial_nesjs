@@ -16,7 +16,7 @@ class Display  {
     this.width = DISP_WIDTH;
     this.height = DISP_HEIGHT;
     this.ImageData = this.ctx.createImageData(this.width, this.height);
-    this.uint32 = new Uint32Array(this.ImageData.data.buffer);
+    this.uint32 = new Uint32Array(DISP_WIDTH * DISP_HEIGHT);
     this.resizeCanvas();
   }
   initCanvas() {
@@ -51,16 +51,46 @@ class Display  {
     let index = y * this.width + x;
     this.uint32[index] = c;
   }
+  _getCanvasColor(nes_color) {
+    let color_array = new Uint8Array(4);
+    color_array[0] = (nes_color & 0x00FF0000 ) >> 16;
+    color_array[1] = (nes_color & 0x0000FF00) >> 8;
+    color_array[2] = (nes_color & 0x000000FF);
+    color_array[3] = 0xFF;
+    return color_array;
+  }
   updateScreen() {
-    for (let i = 0; i < this.canvas.width * this.canvas.height * 4; i += 4) {
-      // this.ImageData.data[i] = (this.uint32[i / 4] & 0xFF000000 ) >> 24;
-      // this.ImageData.data[i + 1] = (this.uint32[i / 4] & 0x00FF0000) >> 16;
-      // this.ImageData.data[i + 2] = (this.uint32[i / 4] & 0x0000FF00) >> 8;
-      this.ImageData.data[i] = (this.uint32[i / 4] & 0x00FF0000 ) >> 16;
-      this.ImageData.data[i + 1] = (this.uint32[i / 4] & 0x0000FF00) >> 8;
-      this.ImageData.data[i + 2] = (this.uint32[i / 4] & 0x000000FF);
-      this.ImageData.data[i + 3] = 0xFF;
-    }    
+    let color_array = new Uint8Array(4);
+    if (this.ctx_multiple === 1) {
+      for (let i = 0; i < this.canvas.width * this.canvas.height * 4; i += 4) {
+        color_array = this._getCanvasColor(this.uint32[i/4]);
+        this.ImageData.data[i]     = color_array[0];
+        this.ImageData.data[i + 1] = color_array[1];
+        this.ImageData.data[i + 2] = color_array[2];
+        this.ImageData.data[i + 3] = color_array[3];
+      }
+    } else if (this.ctx_multiple > 1) {
+      for (let i = 0; i < DISP_HEIGHT ; i++) {
+        for (let j = 0; j < DISP_WIDTH; j++) {
+          color_array = this._getCanvasColor(this.uint32[i / 4]);
+          color_array = this._getCanvasColor(this.uint32[i * DISP_WIDTH + j]);
+          for (let x = 0; x < this.ctx_multiple; x++) {
+            for (let y = 0; y < this.ctx_multiple; y++) {
+              let idx = (
+                ((i*this.ctx_multiple + x) * this.canvas.width) +
+                (j*this.ctx_multiple + y)
+              ) * 4;
+              this.ImageData.data[idx] = color_array[0];
+              this.ImageData.data[idx + 1] = color_array[1];
+              this.ImageData.data[idx + 2] = color_array[2];
+              this.ImageData.data[idx + 3] = color_array[3];
+
+            }
+          }
+
+        }
+      }
+    }
     this.ctx.putImageData(this.ImageData, 0, 0);
     return;
   }
