@@ -2,6 +2,7 @@
 import { Register8bit, Register16bit } from './Register.js';
 import { PALETTES, PpuControlRegister, PpuMaskRegister, PpuStatusRegister } from './PpuRegisterPalette.js';
 import { Memory } from './Memory.js';
+import { CPU_INTS } from './CpuOpcodes.js';
 class Ppu {
   constructor(nes) {
     this.isPpu = true;
@@ -586,8 +587,10 @@ class Ppu {
         this.ppustatus.setVBlank();
         this.display.updateScreen();
 
-        //if(this.ppuctrl.enabledNmi() === true)
-        //  this.cpu.interrupt(this.cpu.INTERRUPTS.NMI);
+        if(this.ppuctrl.enabledNmi() === true){
+          // this.cpu.interrupt(this.cpu.CPU_INTS.NMI);
+          this.cpu.interrupt(CPU_INTS.NMI);
+        }
       } else if (this.scanLine === 261) {
         this.ppustatus.clearVBlank();
         this.ppustatus.clearZeroHit();
@@ -597,8 +600,10 @@ class Ppu {
 
     if (this.cycle === 10) {
       if (this.scanLine === 241) {
-        if (this.ppuctrl.enabledNmi() === true)
-          this.cpu.interrupt(this.cpu.INTERRUPTS.NMI);
+        if (this.ppuctrl.enabledNmi() === true) {
+          // this.cpu.interrupt(this.cpu.INTERRUPTS.NMI);
+          this.cpu.interrupt(CPU_INTS.NMI);
+        }
       }
     }
 

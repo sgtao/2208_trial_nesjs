@@ -804,9 +804,9 @@ class Cpu {
     this.p.clearN();
     this.updateZ(result);
     if ((data & 1) == 0)
-      self.p.clearC();
+      this.p.clearC();
     else
-      self.p.setC();
+      this.p.setC();
     return result & 0xff;
   }
   opLSR(address) {
@@ -822,11 +822,11 @@ class Cpu {
   // ROL : Aまたはメモリを左へローテートします。
   // 左ローテート
   opROL_Sub(data) {
-    let c = self.p.isC() ? 1 : 0;
+    let c = this.p.isC() ? 1 : 0;
     let result = (data << 1) | c;
-    self.updateN(result);
-    self.updateZ(result);
-    self.updateC(result);
+    this.updateN(result);
+    this.updateZ(result);
+    this.updateC(result);
     return result & 0xff;
   }
   opROL(address) {
