@@ -11,8 +11,8 @@ class Mapper {
   constructor (rom) {
     this.isMapper = true;
     this.rom = rom;
-    this.prgBankNum = rom.header_parse.prog_bank_num;
-    this.chrBankNum = rom.header_parse.char_bank_num;
+    this.prgBankNum = rom.header_parse.prg_bank_num;
+    this.chrBankNum = rom.header_parse.chr_bank_num;
     this.mapper_num = rom.header_parse.mapper_num;
     // console.log(MAPPERS);
   }
@@ -26,9 +26,14 @@ class Mapper {
     return MAPPERS[number];
   }
   /**
-   * Mapper0(NROM) implementation
+   * Mapper0(NROM, no Mapper) only implementation
    */
   map(address) {
+    // 0x8000 - 0xBFFF: First 16 KB of ROM
+    // 0xC000 - 0xFFFF: Last 16 KB of ROM (NROM-256) or
+    //                  mirror of 0x8000 - 0xBFFF (NROM-128).
+    if (this.prgBankNum === 1 && address >= 0xC000)
+      address -= 0x4000;
     return address - 0x8000;
   }
   /**

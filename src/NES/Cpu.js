@@ -959,10 +959,10 @@ class Cpu {
     return buffer;
   }
   dump_cpu_memory() {
-    // let dump_size = 0x10000; // 64KB
-    let dump_size = 0x800; // 2KB
+    let dump_size = 0x10000; // 64KB
+    // let dump_size = 0x800; // 2KB
     // let dump_size = 0x200; // 512B
-    let cpu_memory = new Memory(dump_size); // 64KB
+    let cpu_memory = new Memory(dump_size);
     for (let i = 0; i < dump_size; i++) {
       cpu_memory.store(i,this.load(i));
     }
