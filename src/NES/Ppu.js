@@ -92,6 +92,7 @@ class Ppu {
   InitPpu() {
     // console.dir(this.ppustatus);
     this.ppustatus.store(0x80);
+    this.vRam.clear();
   }
   /**
    *
