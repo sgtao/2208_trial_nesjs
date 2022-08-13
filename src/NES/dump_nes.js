@@ -8,7 +8,7 @@ const DUMP_Level = 1; // 1 is short message, 2 is long message
  * dump methods
  */
 class dump_nes {
-  constructor (area) {
+  constructor(area) {
     this.area = area;
     this.clrMessage();
     this.putMessage('add dump console..');

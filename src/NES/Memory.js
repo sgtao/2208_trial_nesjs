@@ -15,7 +15,7 @@ class Memory {
   /**
    *  class methods
    */
-  clear(){
+  clear() {
     for (let i = 0, il = this.getCapacity(); i < il; i++)
       this.storeWithoutMapping(i, 0);
   }
@@ -26,7 +26,7 @@ class Memory {
     return this.data[address];
   }
   load2Byte(address) {
-    return (this.data[address+1] << 8 ) | (this.data[address]);
+    return (this.data[address + 1] << 8) | this.data[address];
   }
   loadWithoutMapping(address) {
     return this.data[address];
@@ -39,7 +39,7 @@ class Memory {
   storeWithoutMapping(address, value) {
     this.data[address] = value;
   }
-  dump () {
+  dump() {
     let buffer = '';
     let previousIsZeroLine = false;
     let offset = 0;
@@ -53,8 +53,7 @@ class Memory {
             i += 0x10;
             skipZero = true;
           }
-          if (skipZero)
-            buffer += '...\n';
+          if (skipZero) buffer += '...\n';
         }
         buffer += log.DecToHexString(i - offset, 4) + ' ';
         previousIsZeroLine = true;
@@ -62,11 +61,9 @@ class Memory {
 
       let value = this.load(i);
       buffer += log.DecToHexString(value, 2, true) + ' ';
-      if (value != 0)
-        previousIsZeroLine = false;
+      if (value != 0) previousIsZeroLine = false;
 
-      if (i % 0x10 == 0xf)
-        buffer += '\n';
+      if (i % 0x10 == 0xf) buffer += '\n';
     }
     return buffer;
   }
@@ -74,8 +71,7 @@ class Memory {
    *
    */
   _checkNext16BytesIsZero(offset, size) {
-    if (offset + 0x10 >= size)
-      return false;
+    if (offset + 0x10 >= size) return false;
 
     let sum = 0;
     for (let i = offset; i < offset + 0x10; i++) {

@@ -1,32 +1,32 @@
-# trial_nesjs
+# 2208_trial_nesjs
 - a trial to build NES emulator by JavaScript
   - refer GitHub : [sairoutine's faithjs](https://github.com/sairoutine/faithjs)
   - refer GitHub : [takahirox's nes-js](https://github.com/takahirox/nes-js)
   - refer Qiita : [bokuwebさんの記事](https://qiita.com/bokuweb/items/1575337bef44ae82f4d3)
   - refer [NES研究所](http://hp.vector.co.jp/authors/VA042397/nes/index.html)
   - refer [Nesdev Wiki](https://wiki.nesdev.org/w/index.php?title=Nesdev)
+  - refer [previous version](https://github.com/sgtao/2201_trial_nesjs)
 
 ## Demo
-- demo site is [this](https://sgtao.github.io/2201_trial_nesjs/)
 
 ## Project setup
 ```
-yarn install
+npm install
 ```
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+npm run serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn build
+npm run build
 ```
 
 ### Lints and fixes files
 ```
-yarn lint
+npm run lint
 ```
 
 ## License

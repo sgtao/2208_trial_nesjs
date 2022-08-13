@@ -1,6 +1,3 @@
-/*!*******************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./src/styles/vendors/bootstrap-reboot.css ***!
-  \*******************************************************************************************/
 /*!
  * Bootstrap Reboot v4.3.1 (https://getbootstrap.com/)
  * Copyright 2011-2019 The Bootstrap Authors
@@ -332,29 +329,4 @@ template {
   display: none !important;
 }
 
-/*!***************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/style.scss ***!
-  \***************************************************************************************************************************************************/
-html, body {
-  font-family: "Kameron", "Noto Sans JP", sans-serif;
-}
-
-header h1 {
-  font-size: 2em;
-  color: blue;
-  transition: all 0.3s;
-}
-header h1:hover {
-  transform: translateX(50px);
-  color: red;
-}
-header .instruction {
-  font-size: larger;
-  font-weight: bold;
-  color: red;
-}
-
-#NESdisplay {
-  display: block;
-  margin: 40px auto;
-}
+html,body{font-family:"Kameron","Noto Sans JP",sans-serif}header h1{font-size:2em;color:blue;transition:all .3s}header h1:hover{transform:translateX(50px);color:red}header .instruction{font-size:larger;font-weight:bold;color:red}#NESdisplay{display:block;margin:40px auto}

@@ -28,7 +28,6 @@ const config = {
     new MiniCssExtractPlugin({
       linkType: "text/css",
     }),
-
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
   ],
@@ -77,7 +76,7 @@ module.exports = () => {
 
     config.plugins.push(new MiniCssExtractPlugin());
 
-    config.plugins.push(new WorkboxWebpackPlugin.GenerateSW());
+    // config.plugins.push(new WorkboxWebpackPlugin.GenerateSW());
   } else {
     config.mode = "development";
   }

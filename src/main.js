@@ -27,7 +27,9 @@ function init() {
 function nes_rom_change(arraybuffer) {
   dump.putMessage('Rom load...');
   if (!nes.SetRom(arraybuffer)) {
-    console.error("Can't get rom data (perhaps you don't set ArrayBuffer arguments or it's not nes rom format)");
+    console.error(
+      "Can't get rom data (perhaps you don't set ArrayBuffer arguments or it's not nes rom format)"
+    );
     return;
   } else {
     dump.putMessage('Header is ');
@@ -45,16 +47,20 @@ function nes_rom_change(arraybuffer) {
 function read_local_file(fileObj, cb) {
   dump.putMessage('read filename is ' + fileObj.name);
   var reader = new FileReader();
-  reader.onload = function (e) { cb(e.target.result); };
+  reader.onload = function (e) {
+    cb(e.target.result);
+  };
   reader.readAsArrayBuffer(fileObj);
 }
 // URL からROMを読み込み
 function read_url(url, cb) {
   dump.putMessage('rom url is ' + url);
   var request = new XMLHttpRequest();
-  request.onload = function () { cb(request.response); };
+  request.onload = function () {
+    cb(request.response);
+  };
   request.onerror = function (e) {
-    console.error("can't get rom binary. Error is ",e);
+    console.error("can't get rom binary. Error is ", e);
   };
   request.open('GET', url, true);
   request.responseType = 'arraybuffer';
@@ -62,34 +68,47 @@ function read_url(url, cb) {
 }
 // DOMのイベントを設定
 function initializeDomEvents() {
-  if (typeof window.FileReader !== "undefined") {
+  if (typeof window.FileReader !== 'undefined') {
     // ドラッグ&ドロップでROM読み込み
-    window.addEventListener("dragenter",
+    window.addEventListener(
+      'dragenter',
       function (e) {
         e.preventDefault();
-      }, false);
+      },
+      false
+    );
 
-    window.addEventListener("dragover",
+    window.addEventListener(
+      'dragover',
       function (e) {
         e.preventDefault();
-      }, false);
+      },
+      false
+    );
 
-    window.addEventListener("drop",
+    window.addEventListener(
+      'drop',
       function (e) {
         e.preventDefault();
         read_local_file(e.dataTransfer.files[0], nes_rom_change);
-      }, false);
+      },
+      false
+    );
     // プルダウンから ROM読み込み
-    document.getElementById("romload").addEventListener("click",
+    document.getElementById('romload').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
 
         // ROM の場所
-        var url = document.getElementById("romlist").value;
+        var url = document.getElementById('romlist').value;
         read_url(url, nes_rom_change);
-      }, false);
+      },
+      false
+    );
     // NES リセット
-    document.querySelector("#nes_reset").addEventListener("click", 
+    document.querySelector('#nes_reset').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.clrMessage();
@@ -98,76 +117,105 @@ function initializeDomEvents() {
         dump.putMessage(nes.cpu.dump());
         dump.putMessage(nes.ppu.dump());
         nes.Run();
-      }, false);
+      },
+      false
+    );
     // STEP実行（+1cycle)
-    document.querySelector("#nes_step").addEventListener("click", 
+    document.querySelector('#nes_step').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('#Step +1cycles');
         nes.cycle_limit += 1;
         nes.Run();
-      }, false);
+      },
+      false
+    );
     // STEP実行（+16cycle)
-    document.querySelector("#nes_step16").addEventListener("click", 
+    document.querySelector('#nes_step16').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('\n#Step +16cycles');
         nes.cycle_limit += 16;
         nes.Run();
-      }, false);
+      },
+      false
+    );
     // STEP実行（+16 * 1024cycle)
-    document.querySelector("#nes_step16K").addEventListener("click", 
+    document.querySelector('#nes_step16K').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('\n#Step +16 * 1024cycles');
         nes.cycle_limit += 16 * 1024;
         nes.cpu.dbg_message = false; // restrict Cpu to show op-code at each cycle.
         nes.Run();
-      }, false);
-    // 
+      },
+      false
+    );
+    //
     // Debug Console をクリア
-    document.querySelector("#clear_console").addEventListener("click", 
+    document.querySelector('#clear_console').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.clrMessage();
         dump.putMessage('clear message...\n');
-      }, false);
+      },
+      false
+    );
     // ROMをダンプ
-    document.querySelector("#dump_rom").addEventListener("click", 
+    document.querySelector('#dump_rom').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('\n\n# Dump ROM data');
         dump.putMessage(nes.rom.dump());
-      }, false);
+      },
+      false
+    );
     // Cpu and Ppu register+operand をダンプ
-    document.querySelector("#dump_cpuppu_reg").addEventListener("click", 
+    document.querySelector('#dump_cpuppu_reg').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('\n# Dump CPU/PPU Registers');
         dump.putMessage(nes.cpu.dump());
         dump.putMessage(nes.ppu.dump());
-      }, false);
+      },
+      false
+    );
     // Cpu memory をダンプ
-    document.querySelector("#dump_cpumem").addEventListener("click", 
+    document.querySelector('#dump_cpumem').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('\n# Dump CPU Memory');
         dump.putMessage(nes.cpu.dump_cpu_memory());
-      }, false);
+      },
+      false
+    );
     // Ppu memory をダンプ
-    document.querySelector("#dump_ppumem").addEventListener("click", 
+    document.querySelector('#dump_ppumem').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('\n# Dump PPU Memory');
         dump.putMessage(nes.ppu.dump_ppu_memory());
-      }, false);
+      },
+      false
+    );
     // Ppu VRAM をダンプ
-    document.querySelector("#dump_ppuvram").addEventListener("click", 
+    document.querySelector('#dump_ppuvram').addEventListener(
+      'click',
       function (e) {
         e.preventDefault();
         dump.putMessage('\n# Dump PPU VRAM');
         dump.putMessage(nes.ppu.dumpVRAM());
-      }, false);
+      },
+      false
+    );
   }
   // 画面の高さに応じてcanvasサイズ変更
   window.addEventListener('resize', () => {

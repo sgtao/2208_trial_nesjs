@@ -12,7 +12,7 @@ class Register {
       this.isRegister16bit = true;
       this.type = 2; // 16bit Register
       this.data = new Uint16Array(1);
-    } else { 
+    } else {
       this.isRegister8bit = true;
       this.type = 1; // 8bit Register
       this.data = new Uint8Array(1);
@@ -58,8 +58,8 @@ class Register {
    *
    */
   storeBit(pos, value) {
-    value = value & 1;  // just in case
-    this.data[0] = this.data[0] & ~(1 << pos) | (value << pos);
+    value = value & 1; // just in case
+    this.data[0] = (this.data[0] & ~(1 << pos)) | (value << pos);
   }
 
   /**
@@ -67,8 +67,8 @@ class Register {
    */
   storeBits(offset, size, value) {
     var mask = (1 << size) - 1;
-    value = value & mask;  // just in case
-    this.data[0] = this.data[0] & ~(mask << offset) | (value << offset);
+    value = value & mask; // just in case
+    this.data[0] = (this.data[0] & ~(mask << offset)) | (value << offset);
   }
 
   /**
@@ -145,20 +145,20 @@ class Register {
    *
    */
   shift(value) {
-    value = value & 1;  // just in case
+    value = value & 1; // just in case
     var carry = this.loadBit(this.getWidth() - 1);
     this.data[0] = (this.data[0] << 1) | value;
     return carry;
   }
 
-  dump () {
+  dump() {
     if (this.type === 1) {
       // log.logHex(this.data);
       return log.toHex(this.data[0]);
     } else if (this.type === 2) {
       let buffer = '';
-      buffer += log.toHex((this.data[0] >> 8) & 0xFF);
-      buffer += log.toHex(this.data[0] & 0xFF);
+      buffer += log.toHex((this.data[0] >> 8) & 0xff);
+      buffer += log.toHex(this.data[0] & 0xff);
       // console.log(buffer)
       return buffer;
     } else {
@@ -169,9 +169,8 @@ class Register {
 class Register8bit extends Register {
   constructor() {
     super(1);
-    this.isRegister8bit= true;
+    this.isRegister8bit = true;
   }
-
 }
 class Register16bit extends Register {
   constructor() {
@@ -206,6 +205,5 @@ class Register16bit extends Register {
   storeLowerByte(value) {
     this.bytes[0] = value;
   }
-
 }
 export { Register8bit, Register16bit };

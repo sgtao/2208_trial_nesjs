@@ -1,10 +1,10 @@
 // Rom.js
-import { Memory } from './Memory.js'
-import { Mapper } from './Mapper.js'
+import { Memory } from './Memory.js';
+import { Mapper } from './Mapper.js';
 class Rom {
   constructor(nes) {
     this.isRom = true;
-    this.nes   = nes;
+    this.nes = nes;
     this.data = null;
     this.size = 0;
     this.header = null;
@@ -24,14 +24,25 @@ class Rom {
       this.header_parse = this._ParseHeader(this.header);
       // this.mapper = new Memory(256); // temporary mapper
       this.mapper = new Mapper(this);
-      console.log('Mapper Num : ' + this.header_parse.mapper_num + ' (' + this.mapper.getName() + ')');
+      console.log(
+        'Mapper Num : ' +
+          this.header_parse.mapper_num +
+          ' (' +
+          this.mapper.getName() +
+          ')'
+      );
       return true;
     } else {
       return false;
     }
   }
   _isNes() {
-    if ([].slice.call(this.header.data, 0, 3).map(v => String.fromCharCode(v)).join('') !== 'NES') {
+    if (
+      [].slice
+        .call(this.header.data, 0, 3)
+        .map((v) => String.fromCharCode(v))
+        .join('') !== 'NES'
+    ) {
       console.error('This file is not NES format.');
       return false;
     } else {
@@ -50,12 +61,12 @@ class Rom {
     // CHR_ROM_BANKS_NUM_ADDRESS = 0x5
     _parse.chr_bank_num = header.load(5);
     // CONTROL_BYTE1_ADDRESS = 0x6, CONTROL_BYTE2_ADDRESS = 0x7
-    _parse.isHorizontalMirror = (header.load(6) & 0x01) ? false : true;
-    _parse.isPresenceBatteryRAM = (header.load(6) & 0x02) ? true : false;
-    _parse.isPresenceTrainer = (header.load(6) & 0x04) ? true : false;
-    _parse.isFourScreenMirror = (header.load(6) & 0x08) ? true : false;
-    _parse.mapper_num = ((header.load(6) & 0xF0) >> 4) |
-    (this.header.load(7) & 0xF0);
+    _parse.isHorizontalMirror = header.load(6) & 0x01 ? false : true;
+    _parse.isPresenceBatteryRAM = header.load(6) & 0x02 ? true : false;
+    _parse.isPresenceTrainer = header.load(6) & 0x04 ? true : false;
+    _parse.isFourScreenMirror = header.load(6) & 0x08 ? true : false;
+    _parse.mapper_num =
+      ((header.load(6) & 0xf0) >> 4) | (this.header.load(7) & 0xf0);
     // SCREEN TYPE
     _parse.screen_type = 0; // SINGLE_SCREEN
     if (_parse.isFourScreenMirror) {
@@ -94,13 +105,13 @@ class Rom {
    * In general writing with ROM address space updates control registers in Mapper.
    */
   store(address, value) {
-    this.mapper.store(address & 0xFF, value);
+    this.mapper.store(address & 0xff, value);
   }
   hasChrRom() {
-    return (this.header_parse.chr_bank_num > 0);
+    return this.header_parse.chr_bank_num > 0;
   }
   getMirroringType() {
-    return (this.header_parse.screen_type);
+    return this.header_parse.screen_type;
   }
   dump() {
     return this.data.dump();
@@ -110,15 +121,25 @@ class Rom {
   }
   header_info() {
     let buffer = '';
-    buffer += 'PRG-ROM banks size: ' + this.header_parse.prg_bank_num * 16+ '(KB)\n';
-    buffer += 'CHR-ROM banks size: ' + this.header_parse.chr_bank_num * 8+ '(KB)\n';
+    buffer +=
+      'PRG-ROM banks size: ' + this.header_parse.prg_bank_num * 16 + '(KB)\n';
+    buffer +=
+      'CHR-ROM banks size: ' + this.header_parse.chr_bank_num * 8 + '(KB)\n';
     buffer += 'mapper number : ' + this.header_parse.mapper_num + '\n';
     buffer += 'screen type   : ';
     switch (this.header_parse.screen_type) {
-      case 1: buffer += 'HORIZONTAL'; break;
-      case 2: buffer += 'VERTICAL'; break;
-      case 3: buffer += 'FOUR_SCREEN'; break;
-      default: buffer += 'SINGLE_SCREEN'; break;
+      case 1:
+        buffer += 'HORIZONTAL';
+        break;
+      case 2:
+        buffer += 'VERTICAL';
+        break;
+      case 3:
+        buffer += 'FOUR_SCREEN';
+        break;
+      default:
+        buffer += 'SINGLE_SCREEN';
+        break;
     }
     buffer += '\n\n';
     return buffer;

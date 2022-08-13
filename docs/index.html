@@ -1,54 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>trial_nesjs</title>
-<script defer src="main.js"></script><link href="main.css" rel="stylesheet"></head>
-<body>
-    <header>
-        <h1>trial nesjs</h1>
-        <div>sairoutineさんの「<a href="https://sairoutine.github.io/faithjs/public/" target="_blank" rel="noopener noreferrer">faithjs</a>」、takahiroxさんの「<a href="http://takahirox.github.io/nes-js/index.html" target="_blank">nes-js</a>」を参考に、nesエミュレータの作成を試みました。</div>
-        <div class="instruction">
-            操作方法：「ロード」ボタンでROMを読込後、「STEP**」をクリックしてステップ実行を繰り返してください。
-        </div>
-    </header>
-    <div class="container">
-        <canvas id="NESdisplay" style="border: 1px solid black;">
-            Unsupported CANVAS
-        </canvas>        
-        <div class="romselector">
-            <label>ROM選択：</label>
-            <select name="romlist" id="romlist">
-                <option value="assets/roms/hello.nes">helloworld</option>
-                <option value="assets/roms/nestest.nes">nestest</option>
-            </select>
-            <button id="romload">ロード</button>
-            <span>ROMファイルを選択して「ロード」ボタンを押してください。</span>
-        </div>
-        <div class="gamectrl">
-            <span>本体操作</span>
-            <button id="nes_reset">RESET</button>
-            <button id="nes_step">STEP+1</button>
-            <button id="nes_step16">STEP+16</button>
-            <button id="nes_step16K">STEP+16K</button>
-        </div>
-        <hr>
-        <div>
-            <div class="dbg_label">
-                <span>debug console: </span>
-                <button id="clear_console">clr.</button>
-                <button id="dump_rom">dump ROM</button>
-                <button id="dump_cpuppu_reg">Cpu/Ppu reg.</button>
-                <button id="dump_cpumem">Cpu mem.</button>
-                <button id="dump_ppumem">Ppu mem.</button>
-                <button id="dump_ppuvram">Ppu VRAM</button>
-            </div>
-            <textarea  id="DBGconsole" class="textArea" value="1" cols="80" rows="10" maxlength="15">コンソール</textarea>
-        </div>        
-    </div>
-</body>
-<script>
-    if ("serviceWorker" in navigator) {
+<!doctype html><html><head><meta charset="utf-8"/><title>trial_nesjs</title><script defer="defer" src="main.js"></script><link href="main.css" rel="stylesheet"></head><body><header><h1>trial nesjs</h1><div>sairoutineさんの「<a href="https://sairoutine.github.io/faithjs/public/" target="_blank" rel="noopener noreferrer">faithjs</a>」、takahiroxさんの「<a href="http://takahirox.github.io/nes-js/index.html" target="_blank">nes-js</a>」を参考に、nesエミュレータの作成を試みました。</div><div class="instruction">操作方法：「ロード」ボタンでROMを読込後、「STEP**」をクリックしてステップ実行を繰り返してください。</div></header><div class="container"><canvas id="NESdisplay" style="border: 1px solid black;">Unsupported CANVAS</canvas><div class="romselector"><label>ROM選択：</label> <select name="romlist" id="romlist"><option value="assets/roms/hello.nes">helloworld</option><option value="assets/roms/nestest.nes">nestest</option></select> <button id="romload">ロード</button> <span>ROMファイルを選択して「ロード」ボタンを押してください。</span></div><div class="gamectrl"><span>本体操作</span> <button id="nes_reset">RESET</button> <button id="nes_step">STEP+1</button> <button id="nes_step16">STEP+16</button> <button id="nes_step16K">STEP+16K</button></div><hr><div><div class="dbg_label"><span>debug console: </span><button id="clear_console">clr.</button> <button id="dump_rom">dump ROM</button> <button id="dump_cpuppu_reg">Cpu/Ppu reg.</button> <button id="dump_cpumem">Cpu mem.</button> <button id="dump_ppumem">Ppu mem.</button> <button id="dump_ppuvram">Ppu VRAM</button></div><textarea id="DBGconsole" class="textArea" value="1" cols="80" rows="10" maxlength="15">コンソール</textarea></div></div></body><script>if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
             navigator.serviceWorker
                 .register("service-worker.js")
@@ -59,6 +9,4 @@
                     console.error("Service Worker registration failed: ", registrationError);
                 });
         });
-    }
-</script>
-</html>
+    }</script></html>
