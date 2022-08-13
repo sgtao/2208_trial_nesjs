@@ -13,7 +13,8 @@
     "babel-loader": "^8.2.3",
     "css-loader": "^6.5.1",
     "eslint": "^8.6.0",
-    "eslint-webpack-plugin": "^3.1.1",
+    "eslint-utils": "^3.0.0",
+    "eslint-webpack-plugin": "^3.2.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.4.5",
     "postcss-loader": "^6.2.1",
@@ -33,8 +34,5 @@
     "dev": "npm run cleanup && webpack --mode=development",
     "watch": "webpack --watch",
     "serve": "webpack serve"
-  },
-  "dependencies": {
-    "eslint-loader": "^4.0.2"
   }
 }
