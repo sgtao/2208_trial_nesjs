@@ -13,9 +13,13 @@
     "babel-loader": "^8.2.3",
     "css-loader": "^6.5.1",
     "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-utils": "^3.0.0",
     "eslint-webpack-plugin": "^3.2.0",
     "html-webpack-plugin": "^5.5.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
     "mini-css-extract-plugin": "^2.4.5",
     "postcss-loader": "^6.2.1",
     "prettier": "^2.7.1",
@@ -29,16 +33,13 @@
   },
   "scripts": {
     "lint": "npx eslint ./src",
-    "format": "prettier -w src/*.{js,jsx} && prettier -w src/**/*.{js,jsx}",
-    "lint-fix": "npm run format && npx eslint ./src lint --fix",
+    "format": "prettier -w src/*.js && prettier -w src/**/*.js",
+    "lint-fix": "npm run format && npx eslint ./src --fix",
     "cleanup": "npx rimraf ./docs/*.html ./docs/*.css ./docs/*.js",
     "build": "npm run cleanup && webpack --mode=production --node-env=production",
     "dev": "npm run cleanup && webpack --mode=development",
     "watch": "webpack --watch",
-    "serve": "webpack serve"
-  },
-  "dependencies": {
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1"
-  }
+    "serve": "webpack serve",
+    "prepare": "husky install"
+  }  
 }
