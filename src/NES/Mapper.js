@@ -1,14 +1,14 @@
 // Mapper.js
 var MAPPERS = {
-  0: { 'name': 'NROM' },
-  1: { 'name': 'MMC1' },
-  2: { 'name': 'UNROM' },
-  3: { 'name': 'CNROM' },
-  4: { 'name': 'MMC3' },
-  76: { 'name': 'Mapper76' },
+  0: { name: 'NROM' },
+  1: { name: 'MMC1' },
+  2: { name: 'UNROM' },
+  3: { name: 'CNROM' },
+  4: { name: 'MMC3' },
+  76: { name: 'Mapper76' },
 };
 class Mapper {
-  constructor (rom) {
+  constructor(rom) {
     this.isMapper = true;
     this.rom = rom;
     this.prgBankNum = rom.header_parse.prg_bank_num;
@@ -32,8 +32,7 @@ class Mapper {
     // 0x8000 - 0xBFFF: First 16 KB of ROM
     // 0xC000 - 0xFFFF: Last 16 KB of ROM (NROM-256) or
     //                  mirror of 0x8000 - 0xBFFF (NROM-128).
-    if (this.prgBankNum === 1 && address >= 0xC000)
-      address -= 0x4000;
+    if (this.prgBankNum === 1 && address >= 0xc000) address -= 0x4000;
     return address - 0x8000;
   }
   /**
@@ -47,13 +46,13 @@ class Mapper {
    * In general, updates control registers in Mapper
    */
   store(address, value) {
-    console.log(`Mapper.store(not work): ${value} to ${address}`)
+    console.log(`Mapper.store(not work): ${value} to ${address}`);
   }
   /**
    *
    */
   getMirroringType() {
-    // screen_type is : 
+    // screen_type is :
     //   0 : 'SINGLE_SCREEN'
     //   1 : 'HORIZONTAL'
     //   2 : 'VERTICAL'
@@ -61,4 +60,4 @@ class Mapper {
     return this.rom.header_parse.screen_type;
   }
 }
-export { Mapper }
+export { Mapper };

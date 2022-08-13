@@ -1,10 +1,15 @@
 // Cpu.js
 import { Register8bit, Register16bit } from './Register.js';
 import { Memory } from './Memory.js';
-import { CPU_INTS, CPU_ADDRESSINGS, CPU_INSTRUCTIONS, CPU_OPS } from './CpuOpcodes.js';
+import {
+  CPU_INTS,
+  CPU_ADDRESSINGS,
+  CPU_INSTRUCTIONS,
+  CPU_OPS,
+} from './CpuOpcodes.js';
 import { log } from './logger.js';
 class Cpu {
-  constructor(nes){
+  constructor(nes) {
     this.isCpu = true;
     this.nes = nes;
     this.rom = null;
@@ -17,7 +22,7 @@ class Cpu {
     this.y = new Register8bit();
     this.p = new CpuStatusRegister();
     // RAM inside CPU
-    this.ram = new Memory(2 * 1024);  // 2KB
+    this.ram = new Memory(2 * 1024); // 2KB
     // Debug flag
     this.dbg_message = true;
   }
@@ -32,11 +37,11 @@ class Cpu {
     this.a.clear();
     this.x.clear();
     this.y.clear();
-    this.sp.store(0xFD);
+    this.sp.store(0xfd);
     this.ram.clear();
 
     // interrupt reset
-    this.interrupt(CPU_INTS.RESET)
+    this.interrupt(CPU_INTS.RESET);
   }
   /**
    *
@@ -48,8 +53,7 @@ class Cpu {
       // console.dir(op);
       this.operate(op, opc);
       this.stallCycle = op.cycle;
-      if (this.dbg_message)
-        console.log(this.dump());
+      if (this.dbg_message) console.log(this.dump());
     }
     this.stallCycle--;
   }
@@ -91,18 +95,18 @@ class Cpu {
     }
     // jump to InterruptHandler
     this.pc.store(this.load2Bytes(cpu_int.addr));
-  }  
+  }
 
   /**
    * load/store methods
    */
   load(address) {
-    address = address & 0xFFFF;  // just in case
+    address = address & 0xffff; // just in case
 
     // 0x0000 - 0x07FF: 2KB internal RAM
     // 0x0800 - 0x1FFF: Mirrors of 0x0000 - 0x07FF (repeats every 0x800 bytes)
     if (address >= 0 && address < 0x2000)
-      return this.ram.load(address & 0x07FF);
+      return this.ram.load(address & 0x07ff);
 
     // 0x2000 - 0x2007: PPU registers
     // 0x2008 - 0x3FFF: Mirrors of 0x2000 - 0x2007 (repeats every 8 bytes)
@@ -126,7 +130,6 @@ class Cpu {
     // if (address >= 0x4017 && address < 0x4020)
     //   return this.apu.loadRegister(address);
 
-
     // cartridge space
     // if (address >= 0x4020 && address < 0x6000)
     //   return this.ram.load(address);
@@ -136,8 +139,7 @@ class Cpu {
     //   return this.ram.load(address);
 
     // 0x8000 - 0xFFFF: ROM
-    if (address >= 0x8000 && address < 0x10000)
-      return this.rom.load(address);
+    if (address >= 0x8000 && address < 0x10000) return this.rom.load(address);
 
     // when access blank addresses, return all-1.
     return 0x00;
@@ -150,12 +152,12 @@ class Cpu {
   }
 
   store(addr, value) {
-    let address = addr & 0xFFFF;
+    let address = addr & 0xffff;
     // 0x0000 - 0x07FF: 2KB internal RAM
     // 0x0800 - 0x1FFF: Mirrors of 0x0000 - 0x07FF (repeats every 0x800 bytes)
 
     if (address >= 0 && address < 0x2000)
-      return this.ram.store(address & 0x7FF, value);
+      return this.ram.store(address & 0x7ff, value);
 
     // 0x2000 - 0x2007: PPU registers
     // 0x2008 - 0x3FFF: Mirrors of 0x2000 - 0x2007 (repeats every 8 bytes)
@@ -179,11 +181,9 @@ class Cpu {
     // if (address >= 0x4017 && address < 0x4020)
     //   return this.apu.storeRegister(address, value);
 
-
     // cartridge space
     // if (address >= 0x4020 && address < 0x6000)
     //   return this.ram.store(address, value);
-
 
     // 0x6000 - 0x7FFF: Battery Backed Save or Work RAM
     // if (address >= 0x6000 && address < 0x8000)
@@ -210,7 +210,7 @@ class Cpu {
     return CPU_OPS[opc];
   }
   /**
-   * temporary 
+   * temporary
    */
   operate(op, opc) {
     let address = 0;
@@ -219,58 +219,57 @@ class Cpu {
     }
     switch (op.instruction.id) {
       case CPU_INSTRUCTIONS.INV.id: // Invalid op , temporary skip
-        console.error('invalid operand')
+        console.error('invalid operand');
         break;
       // Load and Store Instructions
       case CPU_INSTRUCTIONS.LDA.id:
-        this.opLDA(address); 
+        this.opLDA(address);
         break;
       case CPU_INSTRUCTIONS.LDX.id:
-        this.opLDX(address); 
+        this.opLDX(address);
         break;
       case CPU_INSTRUCTIONS.LDY.id:
-        this.opLDY(address); 
+        this.opLDY(address);
         break;
       case CPU_INSTRUCTIONS.STA.id:
-        this.opSTA(address); 
+        this.opSTA(address);
         break;
       case CPU_INSTRUCTIONS.STX.id:
-        this.opSTX(address); 
+        this.opSTX(address);
         break;
       case CPU_INSTRUCTIONS.STY.id:
-        this.opSTY(address); 
+        this.opSTY(address);
         break;
       // Transfer Instructions
       case CPU_INSTRUCTIONS.TAX.id:
-        this.opTAX(); 
+        this.opTAX();
         break;
       case CPU_INSTRUCTIONS.TAY.id:
-        this.opTAY(); 
+        this.opTAY();
         break;
       case CPU_INSTRUCTIONS.TSX.id:
-        this.opTSX(); 
+        this.opTSX();
         break;
       case CPU_INSTRUCTIONS.TXA.id:
-        this.opTXA(); 
+        this.opTXA();
         break;
       case CPU_INSTRUCTIONS.TXS.id:
-        this.opTXS(); 
+        this.opTXS();
         break;
       case CPU_INSTRUCTIONS.TYA.id:
-        this.opTYA(); 
+        this.opTYA();
         break;
       // Arithmetic/Logical/etc. Instructions
       case CPU_INSTRUCTIONS.ADC.id:
-        this.opADC(address); 
+        this.opADC(address);
         break;
       case CPU_INSTRUCTIONS.AND.id:
-        this.opAND(address); 
+        this.opAND(address);
         break;
       case CPU_INSTRUCTIONS.ASL.id:
         if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
           this.a.store(this.opASL_Sub(this.a.load()));
-        else
-          this.opASL(address); 
+        else this.opASL(address);
         break;
       case CPU_INSTRUCTIONS.BIT.id:
         this.opBIT(address);
@@ -308,8 +307,7 @@ class Cpu {
       case CPU_INSTRUCTIONS.LSR.id:
         if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
           this.a.store(this.opLSR_Sub(this.a.load()));
-        else
-          this.opLSR(address);
+        else this.opLSR(address);
         break;
       case CPU_INSTRUCTIONS.ORA.id:
         this.opORA(address);
@@ -317,14 +315,12 @@ class Cpu {
       case CPU_INSTRUCTIONS.ROL.id:
         if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
           this.a.store(this.opROL_Sub(this.a.load()));
-        else
-          this.opROL(address);
+        else this.opROL(address);
         break;
       case CPU_INSTRUCTIONS.ROR.id:
         if (op.mode.id == CPU_ADDRESSINGS.ACCUMULATOR.id)
           this.a.store(this.opRROR_Sub(this.a.load()));
-        else
-          this.opROR(address);
+        else this.opROR(address);
         break;
       case CPU_INSTRUCTIONS.SBC.id:
         this.opSBC(address);
@@ -410,7 +406,7 @@ class Cpu {
         break;
       //
       // not implemented oprands
-      default: 
+      default:
         // temporary skip.
         console.error('Cpu.operand is not implemented yet');
         // throw new Error('Cpu.operate: Invalid instruction, pc=' + Utility.convertDecToHexString(this.pc.load() - 1) + ' opc=' + Utility.convertDecToHexString(opc, 2) + ' name=' + op.instruction.name);
@@ -420,10 +416,10 @@ class Cpu {
   }
 
   /**
-   * NES CPU アドレッシングモード 
+   * NES CPU アドレッシングモード
    */
   // get Address Interface
-  getAddressWithAddressingMode (op) {
+  getAddressWithAddressingMode(op) {
     let address;
     // get address
     switch (op.mode.id) {
@@ -482,7 +478,7 @@ class Cpu {
       }
       default:
         throw new Error('Cpu: Unkown addressing mode.');
-        // break;
+      // break;
     }
     return address;
   }
@@ -507,8 +503,8 @@ class Cpu {
   // 2番目のバイトを下位アドレス、 3番目のバイトを上位アドレスとして実効アドレスとします。
   getAddressAbsolute() {
     let addr = this.load2Bytes(this.pc.load());
-    this.pc.incrementBy2()
-    return (addr & 0xFFFF);
+    this.pc.incrementBy2();
+    return addr & 0xffff;
   }
 
   // Indexed Zero Page Addressing X
@@ -516,16 +512,15 @@ class Cpu {
   getAddressZeroPageX() {
     let addr = this.getAddressZeroPage();
     addr += this.x.load();
-    return (addr & 0xFF);
+    return addr & 0xff;
   }
-
 
   // Indexed Zero Page Addressing Y
   // 上位アドレスとして$00、 下位アドレスとして2番目のバイトにインデックスレジスタYを加算した値を実効アドレスとします。
   getAddressZeroPageY() {
     let addr = this.getAddressZeroPage();
     addr += this.y.load();
-    return (addr & 0xFF);
+    return addr & 0xff;
   }
 
   // Indexed Indirect Addressing
@@ -536,7 +531,7 @@ class Cpu {
   getAddressIndirectX() {
     let index = this.getAddressZeroPage();
     index += this.x.load();
-    return this.load2Bytes(index & 0xFF);
+    return this.load2Bytes(index & 0xff);
   }
 
   // Indirect Indexed Addressing
@@ -549,7 +544,7 @@ class Cpu {
     let index = this.getAddressZeroPage();
     let address = this.load2Bytes(index);
     address += this.y.load();
-    return (address & 0xFFFF);
+    return address & 0xffff;
   }
 
   // Indexed Absolute Addressing X
@@ -558,7 +553,7 @@ class Cpu {
   getAddressAbsoluteX() {
     let addr = this.getAddressAbsolute();
     addr += this.x.load();
-    return (addr & 0xFFFF);
+    return addr & 0xffff;
   }
 
   // Indexed Absolute Addressing Y
@@ -567,7 +562,7 @@ class Cpu {
   getAddressAbsoluteY() {
     let addr = this.getAddressAbsolute();
     addr += this.y.load();
-    return (addr & 0xFFFF);
+    return addr & 0xffff;
   }
 
   // Relative Addressing
@@ -575,8 +570,7 @@ class Cpu {
   getAddressRelative() {
     let addr = this.load(this.pc.load());
     this.pc.increment();
-    if (addr & 0x80)
-      addr -= 0x100;
+    if (addr & 0x80) addr -= 0x100;
     return addr;
   }
 
@@ -585,24 +579,18 @@ class Cpu {
    */
   // bit-7: Negative Flag
   updateN(value) {
-    if ((value & 0x80) === 0)
-      this.p.clearN();
-    else
-      this.p.setN();
+    if ((value & 0x80) === 0) this.p.clearN();
+    else this.p.setN();
   }
   // bit-1: Zero Flag
   updateZ(value) {
-    if ((value & 0xff) === 0)
-      this.p.setZ();
-    else
-      this.p.clearZ();
+    if ((value & 0xff) === 0) this.p.setZ();
+    else this.p.clearZ();
   }
   // bit-0: Carry Flag
   updateC(value) {
-    if ((value & 0x100) === 0)
-      this.p.clearC();
-    else
-      this.p.setC();
+    if ((value & 0x100) === 0) this.p.clearC();
+    else this.p.setC();
   }
   /**
    * NES CPU スタック
@@ -612,7 +600,7 @@ class Cpu {
     return this.sp.load() + 0x100;
   }
   // スタックにpush
-  pushStack (value) {
+  pushStack(value) {
     this.store(this.getStackAddress(), value);
     this.sp.decrement();
   }
@@ -634,7 +622,7 @@ class Cpu {
     return (this.load(this.getStackAddress()) << 8) | value;
   }
 
-  /* 
+  /*
    * NES CPU オペコード
    */
 
@@ -718,17 +706,15 @@ class Cpu {
     let src1 = this.a.load();
     let src2 = this.load(address);
     let c = this.p.isC() ? 1 : 0;
-    let result = (src1 + src2 + c);
+    let result = src1 + src2 + c;
     // console.log('adc result ' , address, src1, src2, c,  'is  ' + result);
     this.a.store(result);
-    this.updateN(result)
-    this.updateZ(result)
-    this.updateC(result)
-    if (!((src1 ^ src2) & 0x80) && ((src2 ^ result) & 0x80))
-      this.p.setV();
-    else
-      this.p.clearV();
-}
+    this.updateN(result);
+    this.updateZ(result);
+    this.updateC(result);
+    if (!((src1 ^ src2) & 0x80) && (src2 ^ result) & 0x80) this.p.setV();
+    else this.p.clearV();
+  }
   // AND : AレジスタとAND演算をする。(結果はAへ格納)
   opAND(address) {
     let result = this.a.load() & this.load(address);
@@ -739,8 +725,8 @@ class Cpu {
   // ASL : Aまたはメモリを左へシフトします。
   // 左シフト
   opASL_Sub(data) {
-    let result = (data << 1)
-    this.updateN(result)
+    let result = data << 1;
+    this.updateN(result);
     this.updateZ(result);
     this.updateC(result);
     return result & 0xff;
@@ -754,10 +740,8 @@ class Cpu {
     let result = data & this.a.load();
     this.updateN(data);
     this.updateZ(result);
-    if ((data & 0x40) == 0)
-      this.p.clearV();
-    else
-      this.p.setV();
+    if ((data & 0x40) == 0) this.p.clearV();
+    else this.p.setV();
   }
   // CMP : src(A/X/Y)とメモリを比較演算します。
   opCMP(address, src) {
@@ -765,20 +749,18 @@ class Cpu {
     let result = src - data;
     this.updateN(result);
     this.updateZ(result);
-    if (src >= data)
-      this.p.setC();
-    else
-      this.p.clearC();
+    if (src >= data) this.p.setC();
+    else this.p.clearC();
   }
   // DEC : メモリをデクリメントします。
   opDEC(address) {
     this.store(address, this.opDEC_Sub(this.load(address)));
   }
   opDEC_Sub(data) {
-    let result = (data - 1);
+    let result = data - 1;
     this.updateN(result);
     this.updateZ(result);
-    return result & 0xFF;
+    return result & 0xff;
   }
   // EOR : Aとメモリを論理XOR演算します。(結果はAへ格納)
   opEOR(address) {
@@ -792,21 +774,19 @@ class Cpu {
     this.store(address, this.opINC_Sub(this.load(address)));
   }
   opINC_Sub(data) {
-    let result = (data + 1);
+    let result = data + 1;
     this.updateN(result);
     this.updateZ(result);
-    return result & 0xFF;
+    return result & 0xff;
   }
   // LSR : Aまたはメモリを右へシフトします。
   // 右シフト
   opLSR_Sub(data) {
-    let result = (data >> 1)
+    let result = data >> 1;
     this.p.clearN();
     this.updateZ(result);
-    if ((data & 1) == 0)
-      this.p.clearC();
-    else
-      this.p.setC();
+    if ((data & 1) == 0) this.p.clearC();
+    else this.p.setC();
     return result & 0xff;
   }
   opLSR(address) {
@@ -839,10 +819,8 @@ class Cpu {
     let result = (data >> 1) | c;
     this.updateN(result);
     this.updateZ(result);
-    if ((data & 1) == 0)
-      this.p.clearC();
-    else
-      this.p.setC();
+    if ((data & 1) == 0) this.p.clearC();
+    else this.p.setC();
     return result & 0xff;
   }
   opROR(address) {
@@ -856,19 +834,15 @@ class Cpu {
     let c = this.p.isC() ? 0 : 1;
     let result = src1 - src2 - c;
     this.a.store(result);
-    this.updateN(result)
-    this.updateZ(result)
+    this.updateN(result);
+    this.updateZ(result);
     // TODO: check if this logic is right.
-    if (src1 >= src2 + c)
-      this.p.setC();
-    else
-      this.p.clearC();
+    if (src1 >= src2 + c) this.p.setC();
+    else this.p.clearC();
     // TODO: implement right overflow logic.
     //       this is just a temporal logic.
-    if (((src1 ^ result) & 0x80) && ((src1 ^ src2) & 0x80))
-      this.p.setV();
-    else
-      this.p.clearV();
+    if ((src1 ^ result) & 0x80 && (src1 ^ src2) & 0x80) this.p.setV();
+    else this.p.clearV();
   }
 
   // PHA : Aをスタックにプッシュダウンします。
@@ -911,7 +885,7 @@ class Cpu {
     this.p.store(this.popStack());
     this.pc.store(this.popStack2Bytes());
   }
-  
+
   // B** : ブランチ処理(flagがtrueの時、pc+(Relative)addressへjumpする)
   opBranch(address, flag) {
     if (flag) {
@@ -948,13 +922,11 @@ class Cpu {
     buffer += this.dump_cpu_op(op, opc);
     buffer += '\n';
     return buffer;
-
   }
   dump_cpu_op(op, opc) {
     let buffer = 'opc=(0x' + log.toHex(opc) + '): ';
     buffer += op.instruction.name + ' ';
-    if (op.mode != null )
-      buffer += op.mode.name;
+    if (op.mode != null) buffer += op.mode.name;
     buffer += ' ';
     return buffer;
   }
@@ -964,7 +936,7 @@ class Cpu {
     // let dump_size = 0x200; // 512B
     let cpu_memory = new Memory(dump_size);
     for (let i = 0; i < dump_size; i++) {
-      cpu_memory.store(i,this.load(i));
+      cpu_memory.store(i, this.load(i));
     }
     return cpu_memory.dump();
   }
@@ -973,14 +945,14 @@ class CpuStatusRegister extends Register8bit {
   constructor() {
     super();
     this.isCpuStatusRegister = true;
-    this.N_BIT= 7;
-    this.V_BIT= 6;
-    this.A_BIT= 5;  // unused bit. A is random name
-    this.B_BIT= 4;
-    this.D_BIT= 3;
-    this.I_BIT= 2;
-    this.Z_BIT= 1;
-    this.C_BIT= 0;
+    this.N_BIT = 7;
+    this.V_BIT = 6;
+    this.A_BIT = 5; // unused bit. A is random name
+    this.B_BIT = 4;
+    this.D_BIT = 3;
+    this.I_BIT = 2;
+    this.Z_BIT = 1;
+    this.C_BIT = 0;
   }
   isN() {
     return this.isBitSet(this.N_BIT);
@@ -1094,6 +1066,5 @@ class CpuStatusRegister extends Register8bit {
     buffer += ')';
     return buffer;
   }
-
 }
 export { Cpu };

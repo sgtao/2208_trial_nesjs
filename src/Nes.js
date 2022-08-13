@@ -5,7 +5,7 @@ import { Ppu } from './NES/Ppu.js';
 import { Rom } from './NES/Rom.js';
 // クラス
 class Nes {
-  constructor (canvas) {
+  constructor(canvas) {
     this.isNes = true;
     this.display = new Display(canvas);
     this.cpu = new Cpu(this);
@@ -18,22 +18,23 @@ class Nes {
     this.cycle_limit = 16;
   }
   SetRom(arrayBuffer) {
-    if (!this.rom.SetRom(arrayBuffer)){ // if failure
+    if (!this.rom.SetRom(arrayBuffer)) {
+      // if failure
       return false;
     } else {
-      this.cpu.SetRom(this.rom);      
+      this.cpu.SetRom(this.rom);
       this.ppu.SetRom(this.rom);
     }
     return this.rom;
   }
-  Init () {
+  Init() {
     this.cpu.InitCpu();
     this.ppu.InitPpu();
     this.cycle = 0;
     this.cycle_limit = 16;
   }
-  Run () {
-    let one_frame_cycle = Math.floor(341 * 262 / 3) | 0; // TODO: temporal
+  Run() {
+    let one_frame_cycle = Math.floor((341 * 262) / 3) | 0; // TODO: temporal
     // this.cycle_limit = one_frame_cycle;
     while (this.cycle < this.cycle_limit) {
       this.runCycle();
