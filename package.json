@@ -18,7 +18,7 @@
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.4.5",
     "postcss-loader": "^6.2.1",
-    "prettier": "^2.5.1",
+    "prettier": "^2.7.1",
     "sass": "^1.45.2",
     "sass-loader": "12.4.0",
     "style-loader": "^3.3.1",
@@ -29,10 +29,16 @@
   },
   "scripts": {
     "lint": "npx eslint ./src",
+    "format": "prettier -w src/*.{js,jsx} && prettier -w src/**/*.{js,jsx}",
+    "lint-fix": "npm run format && npx eslint ./src lint --fix",
     "cleanup": "npx rimraf ./docs/*.html ./docs/*.css ./docs/*.js",
     "build": "npm run cleanup && webpack --mode=production --node-env=production",
     "dev": "npm run cleanup && webpack --mode=development",
     "watch": "webpack --watch",
     "serve": "webpack serve"
+  },
+  "dependencies": {
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1"
   }
 }
