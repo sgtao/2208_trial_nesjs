@@ -47,6 +47,7 @@ class Mapper {
    * In general, updates control registers in Mapper
    */
   store(address, value) {
+    console.log(`Mapper.store(not work): ${value} to ${address}`)
   }
   /**
    *
